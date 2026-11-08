@@ -615,17 +615,48 @@ function renderLearn(){
 
 /* ===================== 単語カード ===================== */
 const DECKS={
- kogo:{nm:"古語",cards:KOGO.map(([w,m,ex],i)=>({id:"c-kogo"+i,gr:+G_KOGO[i],f:w,b:`<div class="mean">${m}</div><div class="ex">${esc(ex)}</div>`,say:w}))},
+ kogo:{nm:"古語",cards:KOGO.map(([w,m,ex],i)=>({id:"c-kogo"+i,gr:+G_KOGO[i],f:w,b:`<div class="mean">${m}</div><div class="ex">${esc(ex)}</div>`,say:modern(w)}))},
  koji:{nm:"故事成語",cards:KOJI.map(([w,r,m,src,st],i)=>({id:"c-koji"+i,gr:kojiGr(i),f:w,b:`<div class="note">${r}</div><div class="mean">${m}</div><div class="ex">『${src}』${st}</div>`}))},
- open:{nm:"冒頭文",cards:WORKS.filter(w=>w.o).map((w,i)=>({id:"c-open"+i,gr:WGR[w.t],f:w.o,long:1,b:`<div class="mean">『${w.t}』</div><div class="ex">${w.a}・${w.e}・${w.g}</div>`,say:w.o}))},
- kanshi:{nm:"漢詩",cards:KANSHI.map((p,i)=>({id:"c-ks"+i,gr:+G_KANSHI[i],f:`「${p.t}」`,long:p.t.length>6?1:0,b:`<div class="note">${p.a}・${p.f}</div><div class="poem">${p.k.join("<br>")}</div>`,say:p.k.join("、")}))},
+ open:{nm:"冒頭文",cards:WORKS.filter(w=>w.o).map((w,i)=>({id:"c-open"+i,gr:WGR[w.t],f:w.o,long:1,b:`<div class="mean">『${w.t}』</div><div class="ex">${w.a}・${w.e}・${w.g}</div>`,say:OPEN_YOMI[w.t]||w.o}))},
+ kanshi:{nm:"漢詩",cards:KANSHI.map((p,i)=>({id:"c-ks"+i,gr:+G_KANSHI[i],f:`「${p.t}」`,long:p.t.length>6?1:0,b:`<div class="note">${p.a}・${p.f}</div><div class="poem">${p.k.join("<br>")}</div>`,say:ksSay(p)}))},
  kana:{nm:"仮名遣い",cards:KANA.map(([h,m,_,r],i)=>({id:"c-kana"+i,gr:1,f:h,b:`<div class="mean">${m}</div><div class="ex">${r}</div>`}))}
 };
 let CS={deck:"kogo",onlyNew:true,i:0,flip:false,order:[]};
 const deckCards=k=>DECKS[k].cards.filter(inG);
 function deckList(){let c=deckCards(CS.deck);if(CS.onlyNew){const u=c.filter(x=>!S.known[x.id]);if(u.length)c=u}return c}
 function resetDeck(){CS.order=shuffle(deckList());CS.i=0;CS.flip=false}
-function speak(text){try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+/* 読み上げ：歴史的仮名遣い→現代の発音に直してから読む */
+function modern(s){
+  const OV={"いふかひなし":"いうかいなし","のたまふ":"のたまう","たまふ":"たまう"};if(OV[s])return OV[s];
+  s=s.replace(/ゐ/g,"い").replace(/ゑ/g,"え").replace(/を/g,"お").replace(/ぢ/g,"じ").replace(/づ/g,"ず");
+  s=s.replace(/(?<=[^、。\s])[はひふへほ]/g,c=>({"は":"わ","ひ":"い","ふ":"う","へ":"え","ほ":"お"}[c]));
+  const A={"か":"こ","さ":"そ","ざ":"ぞ","た":"と","だ":"ど","な":"の","は":"ほ","ば":"ぼ","ま":"も","や":"よ","ら":"ろ","わ":"お","あ":"お","が":"ご"};
+  const I={"き":"きゅ","し":"しゅ","ち":"ちゅ","い":"ゆ","り":"りゅ","ぎ":"ぎゅ","じ":"じゅ","に":"にゅ"};
+  const E={"け":"きょ","せ":"しょ","て":"ちょ","ね":"にょ","へ":"ひょ","め":"みょ","れ":"りょ","え":"よ","げ":"ぎょ","ぜ":"じょ"};
+  return s.replace(/([かさざただなはばまやらわあが])う/g,(m,c)=>A[c]+"う").replace(/([きしちいりぎじに])う/g,(m,c)=>I[c]+"う").replace(/([けせてねへめれえげぜ])う/g,(m,c)=>E[c]+"う")}
+const OPEN_YOMI={"竹取物語":"今は昔、竹取の翁というものありけり。","土佐日記":"男もすなる日記というものを、女もしてみんとてするなり。","枕草子":"春はあけぼの。ようよう白くなりゆく山ぎわ、少しあかりて、紫だちたる雲の細くたなびきたる。","源氏物語":"いずれのおおんときにか、にょうご、こうい、あまたさぶらいたまいける中に、","方丈記":"ゆく河の流れは絶えずして、しかももとの水にあらず。","平家物語":"祇園精舎の鐘の声、諸行無常の響きあり。","徒然草":"つれづれなるままに、ひぐらし、すずりに向かいて、心にうつりゆくよしなしごとを、そこはかとなく書きつくれば、","おくのほそ道":"月日は、はくたいのかかくにして、行きかう年もまた旅人なり。"};
+const KS_FIX=[["烽火三月","ほうかさんげつ"],["煙花三月","えんかさんがつ"],["今春看又過ぐ","こんしゅんみすみすすぐ"],["牀前","しょうぜん"],["処処","しょしょ"],["啼鳥","ていちょう"],["春眠","しゅんみん"],["夜来","やらい"],["風雨","ふうう"],["多少","たしょう"],["看る","みる"],["山月","さんげつ"],["低れて","たれて"],["江碧","こうへき"],["逾よ","いよいよ"],["然えん","もえん"],["欲す","ほっす"],["何れ","いずれ"],["帰年","きねん"],["故人","こじん"],["辞し","じし"],["揚州","ようしゅう"],["孤帆","こはん"],["遠影","えんえい"],["碧空","へきくう"],["天際","てんさい"],["渭城","いじょう"],["朝雨","ちょうう"],["軽塵","けいじん"],["浥す","うるおす"],["客舎","かくしゃ"],["青青","せいせい"],["柳色","りゅうしょく"],["一杯","いっぱい"],["陽関","ようかん"],["山河","さんが"],["城春","しろはる"],["草木","そうもく"],["濺ぎ","そそぎ"],["家書","かしょ"],["万金","ばんきん"],["抵たる","あたる"],["白頭","はくとう"],["搔けば","かけば"],["渾べて","すべて"],["簪","しん"],["勝えざらん","たえざらん"]];
+const ksSay=p=>KS_FIX.reduce((t,[a,b])=>t.split(a).join(b),modern(p.k.join("。")));
+let JA=null;
+function loadVoices(){try{const v=speechSynthesis.getVoices();JA=v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
+try{loadVoices();speechSynthesis.addEventListener("voiceschanged",loadVoices)}catch(e){}
+function speak(text,btn){
+  const msg=t=>{const m=document.getElementById("saymsg");if(m)m.textContent=t};
+  if(!("speechSynthesis" in window)){msg("この端末・ブラウザは読み上げに対応していません。");return}
+  const ss=speechSynthesis;
+  if(btn.dataset.on){ss.cancel();btn.dataset.on="";btn.textContent="読み上げ";return}
+  if(ss.speaking||ss.pending)ss.cancel();
+  if(!JA)loadVoices();
+  const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";if(JA)u.voice=JA;u.rate=.85;
+  let started=false;
+  u.onstart=()=>{started=true;btn.dataset.on="1";btn.textContent="停止";msg("")};
+  u.onend=()=>{btn.dataset.on="";btn.textContent="読み上げ"};
+  u.onerror=e=>{btn.dataset.on="";btn.textContent="読み上げ";if(e.error!=="canceled"&&e.error!=="interrupted")msg("読み上げできませんでした（"+e.error+"）。")};
+  try{ss.resume()}catch(e){}
+  ss.speak(u);
+  btn.textContent="準備中…";
+  setTimeout(()=>{if(!started){btn.textContent="読み上げ";msg("音が出ないときは、マナーモード（消音スイッチ）を切って音量を上げてから、もう一度押してください。")}},2500);
+}
 function renderCards(){
   const avail=Object.keys(DECKS).filter(k=>deckCards(k).length);
   if(!avail.includes(CS.deck)){CS.deck=avail[0];CS.order=[]}
@@ -638,7 +669,7 @@ function renderCards(){
   ${c?`<div class="flash" id="flash" role="button" tabindex="0" aria-label="カードをめくる">
     <div class="front${c.long?" long":""}">${c.f}</div>
     ${CS.flip?`<div class="back">${c.b}</div>`:`<div class="hint">タップして答えを見る</div>`}
-    ${c.say?`<button class="speak" id="say">読み上げ</button>`:""}
+    ${c.say?`<button class="speak" id="say" type="button">読み上げ</button><div class="note" id="saymsg" aria-live="polite"></div>`:""}
   </div>
   <div class="note" style="text-align:center">${CS.i+1} / ${CS.order.length}</div>
   <div class="cardbtns"><button class="sub-btn again" id="c-again">まだ</button><button class="sub-btn good" id="c-good">覚えた</button></div>`:
@@ -646,8 +677,8 @@ function renderCards(){
   document.querySelectorAll(".deck").forEach(b=>b.onclick=()=>{CS.deck=b.dataset.d;resetDeck();renderCards()});
   document.getElementById("onlynew").onchange=e=>{CS.onlyNew=e.target.checked;resetDeck();renderCards()};
   const f=document.getElementById("flash");
-  if(f){const flip=()=>{CS.flip=!CS.flip;renderCards()};f.onclick=e=>{if(e.target.id!=="say")flip()};f.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip()}};
-    const sy=document.getElementById("say");if(sy)sy.onclick=e=>{e.stopPropagation();speak(c.say)};
+  if(f){const flip=()=>{CS.flip=!CS.flip;renderCards()};f.onclick=e=>{if(!e.target.closest("#say,#saymsg")){try{speechSynthesis.cancel()}catch(_){}flip()}};f.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip()}};
+    const sy=document.getElementById("say");if(sy)sy.onclick=e=>{e.stopPropagation();speak(c.say,sy)};
     const next=()=>{CS.i++;CS.flip=false;if(CS.i>=CS.order.length)resetDeck();renderCards()};
     document.getElementById("c-good").onclick=()=>{S.known[c.id]=1;save();next()};
     document.getElementById("c-again").onclick=()=>{delete S.known[c.id];save();CS.order.push(c);next()};}
