@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="古文漢文">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#22395E">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>古文漢文ドリル</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-column phone app shell — 藍染(indigo) header band, washi-white sheets, gold for progress; bottom tab bar */
+:root{
+  --bg:#EEF1EE; --sheet:#FBFCFA; --ink:#1B2230; --sub:#5A6474; --line:#D6DCD8;
+  --ai:#22395E; --ai-soft:#DCE4F0; --kin:#B9861F; --kin-soft:#F3E7C8;
+  --ok:#2F7A55; --ok-soft:#DCEFE4; --ng:#A8343B; --ng-soft:#F6DEDF;
+  --onai:#F5F2E8;
+  --mincho:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --goth:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1522; --sheet:#162133; --ink:#E5E8EE; --sub:#9AA5B6; --line:#2A3850;
+  --ai:#9DB8E4; --ai-soft:#22324C; --kin:#E2B75A; --kin-soft:#3A3220;
+  --ok:#6CC69A; --ok-soft:#173527; --ng:#EE8A8F; --ng-soft:#3E1F24; --onai:#0E1522; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1522; --sheet:#162133; --ink:#E5E8EE; --sub:#9AA5B6; --line:#2A3850;
+  --ai:#9DB8E4; --ai-soft:#22324C; --kin:#E2B75A; --kin-soft:#3A3220;
+  --ok:#6CC69A; --ok-soft:#173527; --ng:#EE8A8F; --ng-soft:#3E1F24; --onai:#0E1522; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--goth);font-size:16px;line-height:1.7;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--ai)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--kin);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ai);color:var(--onai)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;padding-block:10px;gap:12px}
+.brand{font-family:var(--mincho);font-weight:800;font-size:1.3rem;letter-spacing:.08em}
+.brand small{font-family:var(--goth);font-weight:500;font-size:.7rem;letter-spacing:.05em;opacity:.8;margin-left:6px}
+header.top .grades{gap:6px;padding-block:0 10px;justify-content:stretch}
+.grades button{flex:1;border:1px solid color-mix(in srgb,var(--onai) 40%,transparent);background:transparent;color:var(--onai);border-radius:999px;padding:3px 0;font-weight:700;font-size:.85rem;cursor:pointer}
+.grades button[aria-pressed="true"]{background:var(--onai);color:var(--ai);border-color:var(--onai)}
+.gchip{font-size:.7rem;font-weight:700;color:var(--kin);margin-left:auto;margin-right:8px;white-space:nowrap}
+.streak{font-size:.8rem;font-weight:700;background:color-mix(in srgb,var(--onai) 16%,transparent);padding:3px 10px;border-radius:999px;white-space:nowrap}
+
+main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+main .wrap{padding-block:18px;display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--mincho);font-weight:700;font-size:1.15rem;margin:0;text-wrap:balance;letter-spacing:.04em}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;color:var(--sub);font-weight:700}
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:16px}
+
+/* today */
+.today{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.ring{width:84px;height:84px}
+.ring circle{fill:none;stroke-width:9}
+.ring .bgc{stroke:var(--line)} .ring .fg{stroke:var(--kin);stroke-linecap:round;transition:stroke-dashoffset .6s}
+.ring text{fill:var(--ink);font-family:var(--mincho);font-weight:800;font-size:22px}
+.stats{display:flex;flex-direction:column;gap:4px;min-width:0}
+.stats b{font-variant-numeric:tabular-nums}
+.big-btn{display:block;width:100%;border:0;border-radius:12px;background:var(--ai);color:var(--onai);padding:15px 16px;font-weight:700;font-size:1.05rem;cursor:pointer;text-align:left}
+.big-btn span{display:block;font-weight:500;font-size:.8rem;opacity:.85}
+.row-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sub-btn{border:1px solid var(--line);background:var(--sheet);border-radius:12px;padding:11px;font-weight:700;cursor:pointer}
+
+.group-title{display:flex;align-items:baseline;gap:10px}
+.group-title .kan{font-family:var(--mincho);font-size:1.6rem;font-weight:800;color:var(--ai);line-height:1}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat{border:1px solid var(--line);background:var(--sheet);border-radius:12px;padding:12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cat .nm{font-weight:700;font-size:.95rem}
+.cat .meta{font-size:.72rem;color:var(--sub);font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--kin);border-radius:999px}
+
+/* tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--sheet);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs button{border:0;background:none;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--sub);cursor:pointer}
+nav.tabs button .g{font-family:var(--mincho);font-size:1.25rem;font-weight:800;line-height:1.2}
+nav.tabs button[aria-current="page"]{color:var(--ai)}
+nav.tabs button[aria-current="page"] .g{color:var(--kin)}
+
+/* learn */
+details.lesson{background:var(--sheet);border:1px solid var(--line);border-radius:12px}
+details.lesson summary{list-style:none;cursor:pointer;padding:13px 16px;font-weight:700;display:flex;justify-content:space-between;gap:8px}
+details.lesson summary::-webkit-details-marker{display:none}
+details.lesson summary::after{content:"＋";color:var(--kin)}
+details.lesson[open] summary::after{content:"－"}
+.lesson .body{padding:0 16px 16px;font-size:.93rem}
+.lesson .body p{margin:.4em 0}
+.tbl{overflow-x:auto}
+.tbl table{border-collapse:collapse;width:100%;font-size:.88rem}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.tbl th{color:var(--sub);font-weight:700;font-size:.78rem;white-space:nowrap}
+.mc{font-family:var(--mincho)}
+.em{color:var(--ng);font-weight:700}
+.key{background:var(--kin-soft);padding:0 4px;border-radius:4px}
+
+/* kanbun vertical */
+.kbbox{overflow-x:auto;display:flex;justify-content:center;padding:6px 0}
+.kb{writing-mode:vertical-rl;font-family:var(--mincho);font-weight:700;font-size:2rem;line-height:2.6;max-height:9.5em;letter-spacing:.12em}
+.kb.small{font-size:1.5rem}
+.kc{position:relative;display:inline-block;padding-block:.06em;border-radius:6px;cursor:default;user-select:none}
+.kc.tap{cursor:pointer}
+.kc.tap:hover{background:var(--ai-soft)}
+.kc .mk{position:absolute;left:-.42em;bottom:-.12em;font-size:.4em;color:var(--ng);letter-spacing:0;font-weight:800}
+.kc .no{position:absolute;right:-.62em;top:.05em;font-size:.38em;letter-spacing:0;font-family:var(--goth);font-weight:700;color:var(--onai);background:var(--ai);border-radius:999px;width:1.5em;height:1.5em;line-height:1.5em;text-align:center;writing-mode:horizontal-tb}
+.kc.done{color:var(--sub)}
+.kc.oki{color:var(--sub);opacity:.55}
+.kc.bad .no{background:var(--ng)}
+.kc.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateY(-3px)}75%{transform:translateY(3px)}}
+
+/* quiz overlay */
+#quiz{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.qhead{display:flex;align-items:center;gap:12px;padding-block:12px}
+.qhead .x{border:0;background:none;font-size:1.4rem;cursor:pointer;color:var(--sub);padding:0 4px}
+.qhead .bar{flex:1;height:8px}
+.qhead .cnt{font-size:.8rem;color:var(--sub);font-variant-numeric:tabular-nums}
+.qcat{font-size:.75rem;font-weight:700;color:var(--kin);letter-spacing:.1em}
+.qtext{font-size:1.12rem;font-weight:500;margin:.3em 0 .8em}
+.qtext .mcbig{font-family:var(--mincho);font-weight:800;font-size:1.9rem;display:block;margin:.2em 0;color:var(--ai)}
+.qtext .quote{font-family:var(--mincho);font-size:1.15rem;display:block;background:var(--sheet);border-left:3px solid var(--kin);padding:8px 12px;margin:.5em 0;border-radius:0 8px 8px 0}
+.choices{display:flex;flex-direction:column;gap:10px}
+.ch{border:1.5px solid var(--line);background:var(--sheet);border-radius:12px;padding:13px 14px;text-align:left;cursor:pointer;font-size:1rem;display:flex;gap:10px;align-items:flex-start}
+.ch .lb{font-family:var(--mincho);font-weight:800;color:var(--sub);min-width:1.2em}
+.ch.ok{border-color:var(--ok);background:var(--ok-soft)}
+.ch.ng{border-color:var(--ng);background:var(--ng-soft)}
+.ch[disabled]{cursor:default}
+.fb{margin-top:14px;border-radius:12px;padding:14px;font-size:.93rem}
+.fb.ok{background:var(--ok-soft)} .fb.ng{background:var(--ng-soft)}
+.fb .v{font-weight:800;font-size:1.05rem;margin-bottom:4px}
+.fb.ok .v{color:var(--ok)} .fb.ng .v{color:var(--ng)}
+.next{margin-top:14px}
+.result{text-align:center;display:flex;flex-direction:column;gap:14px;padding-block:24px}
+.result .score{font-family:var(--mincho);font-size:3.4rem;font-weight:800;color:var(--ai);line-height:1}
+.result ul{text-align:left;margin:0;padding-left:1.2em;font-size:.9rem}
+
+/* cards */
+.decks{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.deck{border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
+.deck[aria-pressed="true"]{background:var(--ai);color:var(--onai);border-color:var(--ai)}
+.flash{min-height:260px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 18px;cursor:pointer;gap:10px}
+.flash .front{font-family:var(--mincho);font-weight:800;font-size:2rem;color:var(--ai);line-height:1.4;text-wrap:balance}
+.flash .front.long{font-size:1.2rem;font-weight:700}
+.flash .back{font-size:1rem}
+.flash .back .mean{font-weight:700;font-size:1.2rem}
+.flash .back .ex{font-family:var(--mincho);color:var(--sub);font-size:.92rem;margin-top:6px}
+.flash .hint{font-size:.75rem;color:var(--sub)}
+.poem{font-family:var(--mincho);writing-mode:vertical-rl;font-size:1.25rem;line-height:1.9;margin:0 auto;max-height:12em;font-weight:700}
+.cardbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cardbtns .sub-btn.good{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.cardbtns .sub-btn.again{background:var(--ng-soft);border-color:var(--ng);color:var(--ng)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--sub)}
+.speak{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 12px;font-size:.8rem;cursor:pointer}
+
+/* weak list */
+.weak li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.weak ul{list-style:none;margin:0;padding:0}
+.weak .w{color:var(--ng);font-weight:700;font-size:.8rem;white-space:nowrap}
+.empty{color:var(--sub);text-align:center;padding:20px 0;font-size:.9rem}
+.note{font-size:.78rem;color:var(--sub)}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="top"><div class="wrap">
+  <div class="brand">古文漢文ドリル<small>中学</small></div>
+  <div class="streak" id="streak">連続 0日</div>
+</div>
+<div class="wrap grades" role="group" aria-label="学年を選ぶ">
+  <button data-g="1">中1</button><button data-g="2">中2</button><button data-g="3">中3</button><button data-g="0">全学年</button>
+</div></header>
+
+<main>
+  <section id="v-home" class="wrap"></section>
+  <section id="v-learn" class="wrap" hidden></section>
+  <section id="v-cards" class="wrap" hidden></section>
+  <section id="v-weak" class="wrap" hidden></section>
+</main>
+
+<nav class="tabs" aria-label="メニュー"><div class="in">
+  <button data-v="home" aria-current="page"><span class="g">今</span>今日</button>
+  <button data-v="learn"><span class="g">要</span>要点</button>
+  <button data-v="cards"><span class="g">札</span>単語カード</button>
+  <button data-v="weak"><span class="g">苦</span>苦手・記録</button>
+</div></nav>
+
+<div id="quiz" hidden></div>
+
+<script>
+/* ===================== データ ===================== */
+const KOGO=[
+["いと","とても・たいそう","いと幼ければ、籠に入れて養ふ。（竹取物語）"],
+["をかし","趣がある・おもしろい","雨など降るもをかし。（枕草子）"],
+["あはれなり","しみじみとした趣がある","夕日のさして…いとあはれなり。（枕草子）"],
+["うつくし","かわいらしい","三寸ばかりなる人、いとうつくしうてゐたり。（竹取物語）"],
+["つきづきし","似つかわしい・ふさわしい","炭もて渡るも、いとつきづきし。（枕草子）"],
+["あやし","不思議だ／身分が低い","あやしがりて、寄りて見るに（竹取物語）"],
+["いみじ","はなはだしい・すばらしい・ひどい","いみじう泣く。"],
+["おどろく","はっと気づく・目を覚ます","風の音にぞおどろかれぬる（古今和歌集）"],
+["ありがたし","めったにない・珍しい","ありがたきもの。舅にほめらるる婿。（枕草子）"],
+["めでたし","すばらしい・立派だ","めでたく書きたる物語。"],
+["ゆかし","見たい・知りたい・聞きたい","ゆかしかりしかど、神へ参るこそ本意なれ（徒然草）"],
+["なつかし","心ひかれる・親しみやすい","なつかしき人。"],
+["つれづれなり","することがなく退屈だ","つれづれなるままに、日暮らし（徒然草）"],
+["やうやう","だんだん・しだいに","やうやう白くなりゆく山ぎは（枕草子）"],
+["さらなり","言うまでもない","夏は夜。月のころはさらなり。（枕草子）"],
+["げに","本当に・なるほど","げに、さもあらむ。"],
+["いとほし","気の毒だ・かわいそうだ","いとほしと思ふ。"],
+["かなし","いとしい・かわいい／悲しい","かなしき子。"],
+["あさまし","驚きあきれる","あさましきこと。"],
+["ののしる","大騒ぎする・評判になる","世の中ののしりけり。"],
+["すさまじ","興ざめだ・殺風景だ","すさまじきもの。昼ほゆる犬。（枕草子）"],
+["わろし","よくない・みっともない","火桶の火も白き灰がちになりてわろし。（枕草子）"],
+["あらまほし","理想的だ・望ましい","少しのことにも、先達はあらまほしきことなり。（徒然草）"],
+["ゐる","座る・じっとしている","いとうつくしうてゐたり。（竹取物語）"],
+["つとめて","早朝／翌朝","冬はつとめて。（枕草子）"],
+["よろづ","さまざまなこと・すべて","野山にまじりて竹を取りつつ、よろづのことに使ひけり。（竹取物語）"],
+["のたまふ","おっしゃる（「言ふ」の尊敬語）","かぐや姫のたまふ。"],
+["まうづ","参上する・お参りする（謙譲語）","石清水に詣でけり。"],
+["はべり","あります・おります（丁寧語）","かかることなむはべりし。"],
+["たまふ","お与えになる／〜なさる（尊敬語）","御文を書き置きたまふ。"],
+["うし","つらい・いやだ","世の中をうしとやさしと思へども（万葉集）"],
+["さうざうし","物足りない・さびしい","さうざうしき心地す。"],
+["やがて","そのまま／すぐに","やがて出で立ちぬ。"],
+["としごろ","長年・数年来","としごろ思ひつること。"],
+["あまた","たくさん・多く","女御・更衣あまたさぶらひたまひける中に（源氏物語）"],
+["かたち","容貌・顔立ち","この児のかたちのけうらなること（竹取物語）"],
+["ことわり","道理・当然のこと","盛者必衰のことわりをあらはす（平家物語）"],
+["にほふ","美しく照り映える","にほふがごとく今盛りなり（万葉集）"],
+["おほかた","だいたい／まったく（〜ない）","おほかた見えず。"],
+["いふかひなし","どうしようもない・つまらない","いふかひなきこと。"]
+];
+
+const KANA=[
+["いふ","いう",["いぶ","ゆう","いお"],"語頭以外の「は・ひ・ふ・へ・ほ」→「わ・い・う・え・お」"],
+["あはれ","あわれ",["あばれ","あうれ","あいれ"],"語頭以外の「は」→「わ」"],
+["おもふ","おもう",["おもぶ","おもお","おもい"],"語頭以外の「ふ」→「う」"],
+["かほ","かお",["かう","かぼ","こお"],"語頭以外の「ほ」→「お」"],
+["いはく","いわく",["いばく","いあく","ゆわく"],"語頭以外の「は」→「わ」"],
+["ゐなか","いなか",["うなか","えなか","わなか"],"「ゐ」→「い」"],
+["こゑ","こえ",["こい","こわ","こう"],"「ゑ」→「え」"],
+["をかし","おかし",["うかし","わかし","よかし"],"「を」→「お」（助詞の「を」以外）"],
+["はぢ","はじ",["はち","わじ","はぎ"],"「ぢ」→「じ」"],
+["よろづ","よろず",["よろつ","よろぞ","よろじ"],"「づ」→「ず」"],
+["やうやう","ようよう",["やあやあ","よおよお","ゆうゆう"],"「au」の音→「ô」（やう→よう）"],
+["まうす","もうす",["まおす","みょうす","もおす"],"「au」の音→「ô」（まう→もう）"],
+["かうべ","こうべ",["かおべ","こおべ","きょうべ"],"「au」の音→「ô」（かう→こう）"],
+["あふぎ","おうぎ",["あうぎ","あおぎ","おおぎ"],"ふ→う にしてから「au」→「ô」（あう→おう）"],
+["うつくしう","うつくしゅう",["うつくしょう","うつくしお","うつくしゅ"],"「iu」の音→「yû」（しう→しゅう）"],
+["いうなり","ゆうなり",["ようなり","いおなり","ゆなり"],"「iu」の音→「yû」（いう→ゆう）"],
+["けふ","きょう",["けう","きゅう","けお"],"ふ→う にしてから「eu」→「yô」（けう→きょう）"],
+["てふ","ちょう",["ちゅう","てう","ちょお"],"ふ→う にしてから「eu」→「yô」（てう→ちょう）"],
+["せうと","しょうと",["しゅうと","せいと","そうと"],"「eu」の音→「yô」（せう→しょう）"],
+["くわし（菓子）","かし",["くゎし","こうし","きゃし"],"「くわ」→「か」"],
+["行かむ","行かん",["行かぬ","行かも","行かう"],"助動詞などの「む」→「ん」"],
+["なほ","なお",["なぼ","のう","なわ"],"語頭以外の「ほ」→「お」"]
+];
+
+const KAKARI=[
+["係りの助詞「ぞ」があるとき、文末の形は？",["連体形","已然形","終止形","連用形"],"「ぞ・なむ・や・か」→連体形、「こそ」→已然形。"],
+["係りの助詞「こそ」があるとき、文末の形は？",["已然形","連体形","終止形","未然形"],"「こそ」だけは已然形で結ぶ。"],
+["係りの助詞「なむ」があるとき、文末の形は？",["連体形","已然形","命令形","終止形"],"「なむ」も「ぞ」と同じく連体形。"],
+["係りの助詞「や」「か」の意味は？",["疑問・反語","強調","打消","過去"],"「ぞ・なむ・こそ」は強調、「や・か」は疑問・反語。"],
+["係りの助詞「ぞ」「なむ」「こそ」の意味は？",["強調","疑問・反語","推量","完了"],"訳すときは特に訳さなくてよいことが多い。"],
+["<span class='quote'>その竹の中に、もと光る竹なむ一筋あり（　）。</span>（　）に入るのは？（竹取物語）",["ける","けり","けれ","けら"],"「なむ」があるので過去の助動詞「けり」は連体形「ける」になる。"],
+["<span class='quote'>山里は冬ぞさびしさまさり（　）</span>（　）に入るのは？（古今和歌集）",["ける","けり","けれ","けろ"],"「ぞ」→連体形「ける」。"],
+["<span class='quote'>花こそ散り（　）。</span>（　）に入るのは？",["けれ","ける","けり","けら"],"「こそ」→已然形「けれ」。"],
+["<span class='quote'>いづれの山か天に近き。</span>「近き」の活用形は？（竹取物語）",["連体形","終止形","已然形","連用形"],"「か」があるので形容詞「近し」が連体形「近き」で結ばれている。"],
+["係り結びで「や」「か」が反語の意味のとき、訳し方は？",["〜だろうか、いや〜ない","〜だろうか","きっと〜だ","〜してはいけない"],"反語は、問いかけの形で強く打ち消す表現。"],
+["次のうち、係り結びになっている文は？",["うれしくこそ思ほゆれ","うれしく思ほゆ","うれしきことあり","うれしと思ふ"],"「こそ」→已然形「思ほゆれ」。"]
+];
+
+const WORKS=[
+{t:"竹取物語",a:"作者未詳",g:"物語",e:"平安時代",o:"今は昔、竹取の翁といふものありけり。",n:"現存する日本最古の物語。かぐや姫の話。"},
+{t:"土佐日記",a:"紀貫之",g:"日記",e:"平安時代",o:"男もすなる日記といふものを、女もしてみむとてするなり。",n:"男性の紀貫之が女性のふりをして、かなで書いた日記。"},
+{t:"枕草子",a:"清少納言",g:"随筆",e:"平安時代",o:"春はあけぼの。やうやう白くなりゆく山ぎは、少しあかりて、紫だちたる雲の細くたなびきたる。",n:"日本三大随筆の一つ。宮仕えの経験から「をかし」の美を描く。"},
+{t:"源氏物語",a:"紫式部",g:"物語",e:"平安時代",o:"いづれの御時にか、女御・更衣あまたさぶらひたまひける中に、",n:"光源氏の一生を描く長編物語。"},
+{t:"方丈記",a:"鴨長明",g:"随筆",e:"鎌倉時代",o:"ゆく河の流れは絶えずして、しかももとの水にあらず。",n:"日本三大随筆の一つ。世の無常を描く。"},
+{t:"平家物語",a:"作者未詳",g:"軍記物語",e:"鎌倉時代",o:"祇園精舎の鐘の声、諸行無常の響きあり。",n:"平家一門の繁栄と滅亡。琵琶法師が語り伝えた。"},
+{t:"徒然草",a:"兼好法師",g:"随筆",e:"鎌倉時代",o:"つれづれなるままに、日暮らし、硯に向かひて、心にうつりゆくよしなしごとを、そこはかとなく書きつくれば、",n:"日本三大随筆の一つ。作者は吉田兼好とも呼ばれる。"},
+{t:"おくのほそ道",a:"松尾芭蕉",g:"紀行文",e:"江戸時代",o:"月日は百代の過客にして、行きかふ年もまた旅人なり。",n:"東北・北陸を旅した俳諧紀行文。"},
+{t:"万葉集",a:"大伴家持ら（編者とされる）",g:"和歌集",e:"奈良時代",o:"",n:"現存する日本最古の歌集。約4500首。"},
+{t:"古今和歌集",a:"紀貫之ら（撰者）",g:"和歌集",e:"平安時代",o:"",n:"最初の勅撰和歌集（天皇の命令で作られた歌集）。"},
+{t:"新古今和歌集",a:"藤原定家ら（撰者）",g:"和歌集",e:"鎌倉時代",o:"",n:"鎌倉時代初期の勅撰和歌集。"},
+{t:"宇治拾遺物語",a:"作者未詳",g:"説話集",e:"鎌倉時代",o:"",n:"「児のそら寝」などを収める説話集。"}
+];
+const SAKU_X=[
+["日本三大随筆に<b>入らない</b>ものは？",["土佐日記","枕草子","方丈記","徒然草"],"三大随筆は『枕草子』『方丈記』『徒然草』。『土佐日記』は日記。"],
+["『平家物語』を各地で語り伝えた人は？",["琵琶法師","吟遊詩人","歌人","僧兵"],"琵琶を弾きながら語った（平曲）。"],
+["「祇園精舎の鐘の声、諸行無常の響きあり」に表れる考え方は？",["すべてのものは移り変わる","努力は必ず報われる","善い行いは返ってくる","自然は永遠に変わらない"],"諸行無常＝この世のすべては変化し続ける、という仏教の考え。"],
+["『枕草子』で「夏は（　）」。（　）に入るのは？",["夜","あけぼの","夕暮れ","つとめて"],"春はあけぼの・夏は夜・秋は夕暮れ・冬はつとめて。"],
+["『枕草子』で「秋は（　）」。（　）に入るのは？",["夕暮れ","夜","あけぼの","つとめて"],"秋は夕暮れ。烏や雁、風の音・虫の音が「あはれ」。"],
+["『竹取物語』で、かぐや姫が最後に帰っていく所は？",["月の都","天竺","竜宮","都の宮中"],"八月十五夜に月からの迎えが来る。"],
+["『おくのほそ道』で「夏草や兵どもが夢の跡」が詠まれた地は？",["平泉","松島","立石寺","最上川"],"奥州藤原氏の栄えた平泉で、栄華のはかなさを詠んだ。"],
+["「閑かさや岩にしみ入る蟬の声」で知られる作品は？",["おくのほそ道","徒然草","古今和歌集","方丈記"],"立石寺（山寺）で詠まれた芭蕉の句。"],
+["『徒然草』「仁和寺にある法師」の教訓は？",["少しのことにも案内役（先達）はあってほしい","早起きは三文の得","急がば回れ","失敗を恐れるな"],"「少しのことにも、先達はあらまほしきことなり」。"]
+];
+
+/* 漢文：[ ]=返り点、*=置き字 */
+const KAERI=[
+{s:"読[レ]書",k:"書を読む",n:"レ点：下の一字から上の一字へ返る。"},
+{s:"登[レ]山",k:"山に登る",n:"レ点：「山」を読んでから「登」に返る。"},
+{s:"不[レ]見",k:"見ず",n:"「不」は書き下しでは「ず」とひらがなで書く。"},
+{s:"春眠不[レ]覚[レ]暁",k:"春眠暁を覚えず",n:"レ点が連続するときは、下から順に一字ずつ返る。（孟浩然「春暁」）"},
+{s:"学*而時習[レ]之",k:"学びて時に之を習ふ",n:"「而」は置き字で読まない。（論語）"},
+{s:"温[レ]故*而知[レ]新",k:"故きを温めて新しきを知る",n:"温故知新のもとになった言葉。（論語）"},
+{s:"有[レ]朋自[二]遠方[一]来",k:"朋有り遠方より来たる",n:"一・二点：二字以上離れて返るときに使う。（論語）"},
+{s:"吾日三省[二]吾身[一]",k:"吾日に三たび吾が身を省みる",n:"「吾身」を読んでから「省」へ返る。（論語）"},
+{s:"己所[レ]不[レ]欲、勿[レ]施[二]*於人[一]",k:"己の欲せざる所は、人に施すこと勿かれ",n:"「於」は置き字。レ点と一・二点の組み合わせ。（論語）"},
+{s:"良薬苦[二]*於口[一]",k:"良薬は口に苦し",n:"「於」は置き字。"},
+{s:"百聞不[レ]如[二]一見[一]",k:"百聞は一見に如かず",n:"一見→如→不の順。（漢書）"},
+{s:"以[二]子之矛[一]、陥[二]子之盾[一]、何如",k:"子の矛を以て、子の盾を陥さば、何如",n:"故事成語「矛盾」の一節。（韓非子）"},
+{s:"因釈[二]其耒[一]*而守[レ]株",k:"因りて其の耒を釈てて株を守り",n:"故事成語「守株」の一節。（韓非子）"},
+{s:"処処聞[二]啼鳥[一]",k:"処処啼鳥を聞く",n:"「啼鳥」は二字なので一・二点を使う。（春暁）"},
+{s:"挙[レ]頭望[二]山月[一]",k:"頭を挙げて山月を望み",n:"（李白「静夜思」）"},
+{s:"不[レ]入[二]虎穴[一]、不[レ]得[二]虎子[一]",k:"虎穴に入らずんば、虎子を得ず",n:"危険を冒さなければ成功は得られない。（後漢書）"},
+{s:"青取[二]之*於藍[一]*而青[二]*於藍[一]",k:"青は之を藍より取りて藍よりも青し",n:"「青は藍より出でて藍より青し」の形でも知られる。（荀子）"},
+{s:"有[下]献[二]不死之薬*於荊王[一]者[上]",k:"不死の薬を荊王に献ずる者有り",n:"上・下点：一・二点をはさんでさらに上へ返る。（韓非子）"}
+];
+
+const KOJI=[
+["矛盾","むじゅん","つじつまが合わないこと","韓非子","何でも突き通す矛と、何も通さない盾を同時に売った商人の話。"],
+["蛇足","だそく","よけいな付け足し","戦国策","蛇の絵を早く描いた者が足まで描き、酒を飲みそこねた話。"],
+["推敲","すいこう","詩や文章の字句を何度も練り直すこと","唐詩紀事","賈島が「推す」か「敲く」かで悩んだ話。"],
+["五十歩百歩","ごじっぽひゃっぽ","少しの違いはあっても本質は同じ","孟子","五十歩逃げた兵が百歩逃げた兵を笑った話。"],
+["漁夫の利","ぎょふのり","二者が争ううちに第三者が利益を得ること","戦国策","シギとハマグリが争う間に漁師が両方を捕らえた話。"],
+["守株","しゅしゅ","古い習慣にこだわり、進歩がないこと","韓非子","切り株にぶつかったウサギをまた待ち続けた農夫の話。"],
+["杞憂","きゆう","無用な心配・取り越し苦労","列子","杞の国の人が天が落ちてこないかと心配した話。"],
+["塞翁が馬","さいおうがうま","人生の幸不幸は予測できない","淮南子","逃げた馬が名馬を連れて戻るなど、禍福が入れ替わる話。"],
+["四面楚歌","しめんそか","周りが敵ばかりで孤立すること","史記","項羽が四方から楚の歌を聞き、味方が降伏したと思った話。"],
+["背水の陣","はいすいのじん","退路を断って全力で取り組むこと","史記","韓信が川を背に陣を敷き、兵を必死に戦わせた話。"],
+["画竜点睛","がりょうてんせい","物事を完成させる最後の大切な仕上げ","歴代名画記","竜の絵に瞳を描き入れると、竜が天に昇った話。"],
+["温故知新","おんこちしん","昔のことを学び、新しい知識や考えを得ること","論語","孔子の言葉「故きを温めて新しきを知る」。"],
+["朝三暮四","ちょうさんぼし","目先の違いにとらわれ、結果が同じことに気づかない","列子","朝三つ夕方四つでは怒った猿が、朝四つ夕方三つで喜んだ話。"],
+["臥薪嘗胆","がしんしょうたん","目的を果たすため、長い間苦労に耐えること","十八史略","薪の上に寝て、苦い胆をなめて復讐を誓った話。"],
+["呉越同舟","ごえつどうしゅう","仲の悪い者同士が同じ場所にいること・協力すること","孫子","敵同士の呉と越の人も、同じ舟で嵐にあえば助け合う。"],
+["虎の威を借る狐","とらのいをかるきつね","強い者の力を頼っていばる者","戦国策","狐が虎の後ろを歩き、獣たちを恐れさせた話。"],
+["助長","じょちょう","（もとは）余計な手助けをしてかえって害すること","孟子","苗を早く育てようと引っぱり、枯らしてしまった話。"]
+];
+
+const KANSHI=[
+{t:"春暁",a:"孟浩然",f:"五言絶句",l:["春眠不覚暁","処処聞啼鳥","夜来風雨声","花落知多少"],r:[0,1,3],k:["春眠暁を覚えず","処処啼鳥を聞く","夜来風雨の声","花落つること知る多少"]},
+{t:"静夜思",a:"李白",f:"五言絶句",l:["牀前看月光","疑是地上霜","挙頭望山月","低頭思故郷"],r:[0,1,3],k:["牀前月光を看る","疑ふらくは是れ地上の霜かと","頭を挙げて山月を望み","頭を低れて故郷を思ふ"]},
+{t:"絶句",a:"杜甫",f:"五言絶句",l:["江碧鳥逾白","山青花欲然","今春看又過","何日是帰年"],r:[1,3],k:["江碧にして鳥逾よ白く","山青くして花然えんと欲す","今春看又過ぐ","何れの日か是れ帰年ならん"]},
+{t:"黄鶴楼にて孟浩然の広陵に之くを送る",a:"李白",f:"七言絶句",l:["故人西辞黄鶴楼","煙花三月下揚州","孤帆遠影碧空尽","唯見長江天際流"],r:[0,1,3],k:["故人西のかた黄鶴楼を辞し","煙花三月揚州に下る","孤帆の遠影碧空に尽き","唯だ見る長江の天際に流るるを"]},
+{t:"元二の安西に使ひするを送る",a:"王維",f:"七言絶句",l:["渭城朝雨浥軽塵","客舎青青柳色新","勧君更尽一杯酒","西出陽関無故人"],r:[0,1,3],k:["渭城の朝雨軽塵を浥す","客舎青青柳色新たなり","君に勧む更に尽くせ一杯の酒","西のかた陽関を出づれば故人無からん"]},
+{t:"春望",a:"杜甫",f:"五言律詩",l:["国破山河在","城春草木深","感時花濺涙","恨別鳥驚心","烽火連三月","家書抵万金","白頭搔更短","渾欲不勝簪"],r:[1,3,5,7],k:["国破れて山河在り","城春にして草木深し","時に感じては花にも涙を濺ぎ","別れを恨んでは鳥にも心を驚かす","烽火三月に連なり","家書万金に抵たる","白頭搔けば更に短く","渾べて簪に勝へざらんと欲す"]}
+];
+const KANSHI_X=[
+["四句でできている漢詩の形式は？",["絶句","律詩","古詩","短歌"],"絶句＝四句、律詩＝八句。"],
+["八句でできている漢詩の形式は？",["律詩","絶句","古詩","長歌"],"律詩は八句。二句ずつ首聯・頷聯・頸聯・尾聯という。"],
+["一句が七字の絶句を何という？",["七言絶句","五言絶句","七言律詩","五言律詩"],"一句の字数（五言・七言）＋句の数（絶句・律詩）で呼ぶ。"],
+["絶句の第三句を何という？",["転句","起句","承句","結句"],"起句（歌い起こす）→承句（受ける）→転句（場面転換）→結句（まとめる）。"],
+["句の終わりを同じ響きの字でそろえることを何という？",["押韻","対句","倒置","体言止め"],"五言詩は偶数句末、七言詩は第一句末と偶数句末で押韻するのが基本。"],
+["律詩で、第三句と第四句・第五句と第六句はどうなるきまり？",["対句になる","押韻しない","同じ字を使う","反語で終わる"],"律詩の頷聯（三・四句）と頸聯（五・六句）は対句にするきまり。"],
+["「国破れて山河在り」の詩で、作者が嘆いていることは？",["戦乱で国が荒れ、家族とも離れていること","旅の途中で道に迷ったこと","友人が遠くへ旅立つこと","春の朝に寝坊したこと"],"杜甫「春望」。安史の乱で荒れた長安で家族を思う詩。"]
+];
+
+const KISO=[
+["レ点の働きは？",["下の一字から、すぐ上の一字に返って読む","二字以上離れた上の字に返って読む","その字を読まない","二度読む"],"例：読レ書 → 書を読む"],
+["一・二点の働きは？",["二字以上離れた上の字に返って読む","すぐ上の一字に返って読む","その字を読まない","音読みで読む"],"例：聞二啼鳥一 → 啼鳥を聞く"],
+["上・下点はどんなときに使う？",["一・二点をはさんで、さらに上へ返るとき","レ点が二つ続くとき","置き字があるとき","句の終わりで"],"例：有下献二不死之薬一者上"],
+["「置き字」とは？",["訓読するときに読まない字（而・於・矣など）","必ず二度読む字","ひらがなで書く字","返り点の一種"],"而・於・于・乎・矣・焉などが代表的な置き字。"],
+["漢字だけで、返り点や送り仮名がない漢文を何という？",["白文","訓読文","書き下し文","現代語訳"],"白文に返り点・送り仮名・句読点を付けたものが訓読文。"],
+["訓読文を、漢字かなまじりの日本語の文に書き直したものは？",["書き下し文","白文","訓読文","漢詩"],"書き下し文は歴史的仮名遣いで書く。"],
+["訓読文の送り仮名は何で書く？",["カタカナ","ひらがな","ローマ字","漢字"],"送り仮名はカタカナ（歴史的仮名遣い）。書き下し文ではひらがなに直す。"],
+["書き下し文で、日本語の助詞・助動詞にあたる字（「不」「之」など）はどう書く？",["ひらがなで書く","漢字のまま書く","カタカナで書く","書かない"],"例：不レ見 → 見ず（「不」→「ず」）"]
+];
+
+/* ===================== 問題の組み立て ===================== */
+const CATS=[
+{id:"kogo",g:"古",nm:"古語の意味"},
+{id:"kana",g:"古",nm:"歴史的仮名遣い"},
+{id:"kakari",g:"古",nm:"係り結び"},
+{id:"saku",g:"古",nm:"作品・文学史"},
+{id:"kaeri",g:"漢",nm:"返り点（並べかえ）"},
+{id:"kiso",g:"漢",nm:"訓読のきまり"},
+{id:"koji",g:"漢",nm:"故事成語"},
+{id:"kanshi",g:"漢",nm:"漢詩"}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function pick(pool,correct,n=3){return shuffle([...new Set(pool)].filter(x=>x!==correct)).slice(0,n)}
+
+function parseKb(s){const t=[];let oki=false;for(let i=0;i<s.length;i++){const c=s[i];
+  if(c==="*"){oki=true;continue}
+  if(c==="["){const j=s.indexOf("]",i);t[t.length-1].m=s.slice(i+1,j);i=j;continue}
+  if("、。".includes(c)){t.push({c,p:1});continue}
+  t.push({c,m:"",oki});oki=false}return t}
+function kbOrder(t){const out=[],st=[],need={"二":"一","三":"二","下":"上","中":"上"};
+  t.forEach((x,i)=>{if(x.p)return;const m=x.m;
+    if(m==="レ"){st.push({i,n:"next"});return}
+    if(need[m]){st.push({i,n:need[m]});return}
+    out.push(i);let lab=m;
+    while(st.length){const top=st[st.length-1];
+      if(top.n==="next"||top.n===lab){st.pop();out.push(top.i);lab=t[top.i].m==="レ"?"":t[top.i].m}else break}
+  });return out.filter(i=>!t[i].oki)}
+
+const Q=[];
+/* 学年（教科書の配当の目安）1=中1 2=中2 3=中3 */
+const G_KOGO="1221212"+"3"+"222"+"3"+"222"+"3333"+"2222"+"1"+"2"+"1"+"1"+"33"+"1"+"3333"+"3"+"1"+"2"+"333";
+const WGR={"竹取物語":1,"土佐日記":3,"枕草子":2,"源氏物語":3,"方丈記":3,"平家物語":2,"徒然草":2,"おくのほそ道":3,"万葉集":3,"古今和歌集":3,"新古今和歌集":3,"宇治拾遺物語":2};
+const G_SAKUX="222221332",G_KAERI="111233333111122133",G_KISO="11311111",G_KANSHI="222223",G_KANSHIX="2222233";
+const kojiGr=i=>KOJI[i][0]==="温故知新"?3:1;
+function mc(cat,id,label,prompt,correct,wrong,explain,gr){Q.push({type:"mc",cat,id,label,prompt,correct,wrong,explain,gr:+gr})}
+KOGO.forEach(([w,m,ex],i)=>mc("kogo","kogo"+i,w,`<span class="mcbig">${w}</span>の意味は？`,m,pick(KOGO.map(k=>k[1]),m),`例文：<span class="mc">${esc(ex)}</span>`,G_KOGO[i]));
+KANA.forEach(([h,mo,ws,rule],i)=>mc("kana","kana"+i,h,`<span class="mcbig">${h}</span>を現代仮名遣いで読むと？`,mo,ws,rule,1));
+KAKARI.forEach(([p,c,ex],i)=>mc("kakari","kak"+i,p.replace(/<[^>]+>/g,"").slice(0,22),p,c[0],c.slice(1),ex,2));
+WORKS.forEach((w,i)=>{const g=WGR[w.t];
+  if(!w.a.includes("未詳")&&!w.a.includes("ら"))mc("saku","sa-a"+i,`『${w.t}』の作者`,`『${w.t}』の作者は？`,w.a,pick(WORKS.filter(x=>!x.a.includes("ら")&&!x.a.includes("未詳")).map(x=>x.a),w.a),w.n,g);
+  mc("saku","sa-g"+i,`『${w.t}』のジャンル`,`『${w.t}』のジャンルは？`,w.g,pick(WORKS.map(x=>x.g),w.g),w.n,g);
+  mc("saku","sa-e"+i,`『${w.t}』の時代`,`『${w.t}』が成立した時代は？`,w.e,pick(["奈良時代","平安時代","鎌倉時代","室町時代","江戸時代"],w.e),w.n,g);
+  if(w.o)mc("saku","sa-o"+i,`冒頭文→『${w.t}』`,`次の冒頭文で始まる作品は？<span class="quote">${w.o}</span>`,w.t,pick(WORKS.filter(x=>x.o).map(x=>x.t),w.t),`作者：${w.a}（${w.e}・${w.g}）。${w.n}`,g);
+});
+SAKU_X.forEach(([p,c,ex],i)=>mc("saku","sax"+i,p.replace(/<[^>]+>/g,"").slice(0,22),p,c[0],c.slice(1),ex,G_SAKUX[i]));
+KAERI.forEach((x,i)=>{const t=parseKb(x.s);Q.push({type:"order",cat:"kaeri",id:"kae"+i,label:x.k,tokens:t,order:kbOrder(t),kaki:x.k,explain:x.n,gr:+G_KAERI[i]})});
+KISO.forEach(([p,c,ex],i)=>mc("kiso","kiso"+i,p.slice(0,22),p,c[0],c.slice(1),ex,G_KISO[i]));
+KOJI.forEach(([w,r,m,src,st],i)=>{
+  mc("koji","koji-m"+i,w,`<span class="mcbig">${w}</span>（${r}）の意味は？`,m,pick(KOJI.map(k=>k[2]),m),`出典『${src}』。${st}`,kojiGr(i));
+  mc("koji","koji-r"+i,`意味→${w}`,`「${m}」という意味の故事成語は？`,w,pick(KOJI.map(k=>k[0]),w),`出典『${src}』。${st}`,kojiGr(i));
+});
+KANSHI.forEach((p,i)=>{const g=G_KANSHI[i];
+  const poem=`<span class="quote">${p.l.join("<br>")}</span>`;
+  mc("kanshi","ks-f"+i,`「${p.t}」の形式`,`この漢詩（${p.a}「${p.t}」）の形式は？${poem}`,p.f,pick(["五言絶句","七言絶句","五言律詩","七言律詩"],p.f),`${p.l.length}句・一句${p.l[0].length}字なので${p.f}。`,g);
+  mc("kanshi","ks-a"+i,`「${p.t}」の作者`,`漢詩「${p.t}」の作者は？`,p.a,pick(["李白","杜甫","孟浩然","王維","白居易"],p.a),`書き下し：<span class="mc">${p.k.join("／")}</span>`,g);
+  const ends=p.l.map(s=>s.slice(-1)),corr=p.r.map(j=>ends[j]).join("・");
+  const combos=new Set();for(let k=0;k<40&&combos.size<3;k++){const idx=shuffle(ends.map((_,j)=>j)).slice(0,p.r.length).sort((a,b)=>a-b);const s=idx.map(j=>ends[j]).join("・");if(s!==corr)combos.add(s)}
+  mc("kanshi","ks-r"+i,`「${p.t}」の押韻`,`「${p.t}」で押韻している字の組み合わせは？${poem}`,corr,[...combos],`${p.f.startsWith("七")?"七言詩は第一句末と偶数句末":"五言詩は偶数句末（第一句末も押韻することがある）"}で韻をふむ。`,g);
+});
+KANSHI_X.forEach(([p,c,ex],i)=>mc("kanshi","ksx"+i,p.slice(0,22),p,c[0],c.slice(1),ex,G_KANSHIX[i]));
+const QMAP=Object.fromEntries(Q.map(q=>[q.id,q]));
+const GNAME=["全学年","中1","中2","中3"];
+const GDESC=["中1〜中3のすべての範囲","歴史的仮名遣い・竹取物語・故事成語・返り点（レ点・一二点）","枕草子・平家物語・徒然草・係り結び・漢詩（絶句）","おくのほそ道・和歌集・論語・漢詩（律詩）・上下点"];
+const inG=x=>!S.grade||x.gr===S.grade;
+const QG=()=>Q.filter(inG);
+
+/* ===================== 保存 ===================== */
+const KEY="kobun-kanbun-v1";
+let S={srs:{},days:{},known:{},grade:0};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const today=()=>{const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5)};
+const INTERVAL=[0,1,2,4,8,16,32];
+function record(id,ok){const t=today(),r=S.srs[id]||{b:0,d:t,w:0,c:0};
+  if(ok){r.b=Math.min(r.b+1,6);r.c++}else{r.b=1;r.w++}
+  r.d=t+(ok?INTERVAL[r.b]:0);S.srs[id]=r;
+  const dk=String(t);S.days[dk]=S.days[dk]||{n:0,c:0};S.days[dk].n++;if(ok)S.days[dk].c++;save()}
+function streak(){let t=today(),n=0;if(!S.days[t])t--;while(S.days[t]){n++;t--}return n}
+const isDue=q=>{const r=S.srs[q.id];return r&&r.d<=today()};
+const mastered=q=>(S.srs[q.id]?.b||0)>=3;
+const isWeak=q=>{const r=S.srs[q.id];return r&&r.w>0&&r.b<3};
+
+function buildSet(pool,n=10){
+  const due=shuffle(pool.filter(isDue)).sort((a,b)=>S.srs[a.id].b-S.srs[b.id].b);
+  const fresh=shuffle(pool.filter(q=>!S.srs[q.id]));
+  let set=[...due.slice(0,Math.ceil(n*.6)),...fresh].slice(0,n);
+  if(set.length<n)set=[...set,...due.slice(Math.ceil(n*.6))].slice(0,n);
+  if(set.length<n){const rest=shuffle(pool.filter(q=>!set.includes(q))).sort((a,b)=>(S.srs[a.id]?.b||0)-(S.srs[b.id]?.b||0));set=[...set,...rest].slice(0,n)}
+  return shuffle(set)}
+function dailySet(){const fresh=[];const byCat=CATS.map(c=>shuffle(QG().filter(q=>q.cat===c.id&&!S.srs[q.id])));
+  for(let k=0;fresh.length<10&&k<20;k++)byCat.forEach(a=>{if(a[k])fresh.push(a[k])});
+  const due=shuffle(QG().filter(isDue)).sort((a,b)=>S.srs[a.id].b-S.srs[b.id].b);
+  let set=[...due.slice(0,6),...shuffle(fresh)].slice(0,10);
+  if(set.length<10)set=[...set,...due.slice(6)].slice(0,10);
+  if(set.length<10)set=[...set,...shuffle(QG().filter(q=>!set.includes(q)))].slice(0,10);
+  return shuffle(set)}
+
+/* ===================== 画面：今日 ===================== */
+const GOAL=20;
+function renderHome(){
+  const d=S.days[today()]||{n:0,c:0},due=QG().filter(isDue).length,weak=QG().filter(isWeak).length;
+  const p=Math.min(d.n/GOAL,1),C=2*Math.PI*36;
+  const total=QG().length,mast=QG().filter(mastered).length;
+  const catHtml=g=>CATS.filter(c=>c.g===g&&QG().some(q=>q.cat===c.id)).map(c=>{const qs=QG().filter(q=>q.cat===c.id),m=qs.filter(mastered).length,du=qs.filter(isDue).length;
+    return `<button class="cat" data-cat="${c.id}"><span class="nm">${c.nm}</span><span class="meta">${qs.length}問 ・ 定着 ${Math.round(m/qs.length*100)}%${du?` ・ 復習 ${du}`:""}</span><span class="bar"><i style="width:${m/qs.length*100}%"></i></span></button>`}).join("");
+  document.getElementById("v-home").innerHTML=`
+  <p class="note" style="margin:0"><b>${GNAME[S.grade]}</b>の範囲：${GDESC[S.grade]}（全${total}問）</p>
+  <div class="sheet today">
+    <svg class="ring" viewBox="0 0 84 84" role="img" aria-label="今日の目標の達成度">
+      <circle class="bgc" cx="42" cy="42" r="36"/><circle class="fg" cx="42" cy="42" r="36" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" transform="rotate(-90 42 42)"/>
+      <text x="42" y="50" text-anchor="middle">${d.n}</text></svg>
+    <div class="stats"><div class="eyebrow">今日の学習</div>
+      <div>目標 <b>${GOAL}</b>問中 <b>${d.n}</b>問・正解 <b>${d.c}</b></div>
+      <div class="note">復習待ち <b>${due}</b>問 ／ 全${total}問中 定着 <b>${mast}</b>問</div></div>
+  </div>
+  <button class="big-btn" id="b-daily">今日のおすすめ10問<span>${due?`復習 ${Math.min(due,6)}問＋新しい問題`:"いろいろな分野から新しい問題"}・間違えた問題はくり返し出ます</span></button>
+  <div class="row-btns"><button class="sub-btn" id="b-weak">苦手だけ（${weak}）</button><button class="sub-btn" id="b-mix">ランダム20問</button></div>
+  <div class="group-title"><span class="kan">古文</span><span class="eyebrow">分野別に解く</span></div>
+  ${catHtml("古")?`<div class="cats">${catHtml("古")}</div>`:`<p class="note">この学年の古文の問題はありません。</p>`}
+  <div class="group-title"><span class="kan">漢文</span><span class="eyebrow">分野別に解く</span></div>
+  ${catHtml("漢")?`<div class="cats">${catHtml("漢")}</div>`:`<p class="note">この学年の漢文の問題はありません。</p>`}
+  <p class="note">正解した問題は 1→2→4→8日後… と間をあけて出題され、間違えた問題はすぐに復習に戻ります（忘れる前に復習する「間隔反復」）。3回続けて正解すると「定着」です。</p>`;
+  document.getElementById("streak").textContent=`連続 ${streak()}日`;
+  document.getElementById("b-daily").onclick=()=>startQuiz(dailySet(),"今日のおすすめ");
+  document.getElementById("b-mix").onclick=()=>startQuiz(shuffle(QG()).slice(0,20),"ランダム20問");
+  document.getElementById("b-weak").onclick=()=>{const w=QG().filter(isWeak);if(w.length)startQuiz(shuffle(w).slice(0,15),"苦手の復習");else showView("weak")};
+  document.querySelectorAll("#v-home .cat").forEach(b=>b.onclick=()=>{const c=CATS.find(x=>x.id===b.dataset.cat);startQuiz(buildSet(QG().filter(q=>q.cat===c.id)),c.nm)});
+}
+
+/* ===================== クイズ ===================== */
+const QZ=document.getElementById("quiz");
+let RUN=null;
+function startQuiz(list,title){if(!list.length)return;RUN={list,i:0,title,res:[]};QZ.hidden=false;document.body.style.overflow="hidden";renderQ()}
+function closeQuiz(){QZ.hidden=true;document.body.style.overflow="";RUN=null;renderAll()}
+function kbHtml(t,{tap=false,nums=null}={}){
+  return `<div class="kbbox"><div class="kb${t.length>12?" small":""}">${t.map((x,i)=>x.p?`<span class="kc">${x.c}</span>`:
+   `<span class="kc${x.oki?" oki":tap?" tap":""}" data-i="${i}" ${tap&&!x.oki?'role="button" tabindex="0"':""}>${x.c}${x.m?`<span class="mk">${x.m}</span>`:""}${nums&&nums[i]?`<span class="no">${nums[i]}</span>`:""}</span>`).join("")}</div></div>`}
+function renderQ(){
+  const q=RUN.list[RUN.i],cat=CATS.find(c=>c.id===q.cat);
+  const head=`<div class="wrap"><div class="qhead"><button class="x" id="qx" aria-label="やめる">×</button><span class="bar"><i style="width:${RUN.i/RUN.list.length*100}%"></i></span><span class="cnt">${RUN.i+1}/${RUN.list.length}</span></div>
+  <div class="qcat">${cat.g==="古"?"古文":"漢文"}・${cat.nm}</div>`;
+  if(q.type==="mc"){
+    const ch=shuffle([q.correct,...q.wrong]);
+    QZ.innerHTML=head+`<div class="qtext">${q.prompt}</div><div class="choices">${ch.map((c,k)=>`<button class="ch" data-c="${esc(c)}"><span class="lb">${"イロハニ"[k]}</span><span>${esc(c)}</span></button>`).join("")}</div><div id="qfb"></div></div>`;
+    QZ.querySelectorAll(".ch").forEach(b=>b.onclick=()=>{const ok=b.dataset.c===q.correct;
+      QZ.querySelectorAll(".ch").forEach(x=>{x.disabled=true;if(x.dataset.c===q.correct)x.classList.add("ok")});if(!ok)b.classList.add("ng");
+      answer(q,ok,`正解：${esc(q.correct)}<br>${q.explain}`)});
+  }else{
+    QZ.innerHTML=head+`<div class="qtext">返り点にしたがって、<b>読む順番</b>に漢字をタップしよう。<span class="note">（うすい字は置き字なので読まない）</span></div>${kbHtml(q.tokens,{tap:true})}<div id="qfb"></div></div>`;
+    let pos=0;const nums={};
+    const tapIt=el=>{if(QZ.dataset.lock)return;const i=+el.dataset.i;if(nums[i])return;
+      if(i===q.order[pos]){pos++;nums[i]=pos;const s=document.createElement("span");s.className="no";s.textContent=pos;el.appendChild(s);el.classList.add("done");el.classList.remove("tap");
+        if(pos===q.order.length){QZ.dataset.lock=1;answer(q,true,`書き下し文：<span class="mc">${q.kaki}</span><br>${q.explain}`)}}
+      else{QZ.dataset.lock=1;el.classList.add("shake");const all={};q.order.forEach((j,k)=>all[j]=k+1);
+        QZ.querySelector(".kbbox").outerHTML=kbHtml(q.tokens,{nums:all});
+        answer(q,false,`正しい順番に番号を付けました。<br>書き下し文：<span class="mc">${q.kaki}</span><br>${q.explain}`)}};
+    QZ.querySelectorAll(".kc.tap").forEach(el=>{el.onclick=()=>tapIt(el);el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tapIt(el)}}});
+  }
+  delete QZ.dataset.lock;
+  document.getElementById("qx").onclick=closeQuiz;
+  QZ.scrollTop=0;
+}
+function answer(q,ok,html){record(q.id,ok);RUN.res.push({q,ok});
+  const last=RUN.i===RUN.list.length-1;
+  document.getElementById("qfb").innerHTML=`<div class="fb ${ok?"ok":"ng"}"><div class="v">${ok?"正解！":"おしい！"}</div>${html}</div><button class="big-btn next" id="qn">${last?"結果を見る":"次へ"}</button>`;
+  const n=document.getElementById("qn");n.onclick=()=>{if(last)renderResult();else{RUN.i++;renderQ()}};n.focus({preventScroll:true});
+  n.scrollIntoView({behavior:"smooth",block:"nearest"})}
+function renderResult(){const c=RUN.res.filter(r=>r.ok).length,ng=RUN.res.filter(r=>!r.ok);
+  const msg=c===RUN.res.length?"全問正解！この調子。":c/RUN.res.length>=.7?"よくできました。間違えた問題は明日以降にまた出ます。":"間違えた問題こそ伸びしろ。もう一度解いてみよう。";
+  QZ.innerHTML=`<div class="wrap result"><div class="eyebrow">${esc(RUN.title)}</div><div class="score">${c}<small style="font-size:1.2rem">/${RUN.res.length}</small></div><p>${msg}</p>
+  ${ng.length?`<div class="sheet"><div class="eyebrow">間違えた問題</div><ul>${ng.map(r=>`<li>${esc(r.q.label)} → <b>${esc(r.q.type==="mc"?r.q.correct:r.q.kaki)}</b></li>`).join("")}</ul></div>
+  <button class="big-btn" id="r-again">間違えた${ng.length}問をもう一度</button>`:""}
+  <button class="sub-btn" id="r-close">ホームにもどる</button></div>`;
+  const ag=document.getElementById("r-again");if(ag)ag.onclick=()=>startQuiz(shuffle(ng.map(r=>r.q)),"間違えた問題");
+  document.getElementById("r-close").onclick=closeQuiz;QZ.scrollTop=0}
+
+/* ===================== 要点 ===================== */
+function renderLearn(){
+  const ex=s=>{const t=parseKb(s),o=kbOrder(t),n={};o.forEach((j,k)=>n[j]=k+1);return kbHtml(t,{nums:n})};
+  const L=[
+  ["古","歴史的仮名遣い（読み方のルール）",[1],`<div class="tbl"><table><tr><th>ルール</th><th>例</th></tr>
+  <tr><td>語頭以外の は・ひ・ふ・へ・ほ → わ・い・う・え・お</td><td class="mc">いふ→いう／かほ→かお</td></tr>
+  <tr><td>ゐ・ゑ・を → い・え・お</td><td class="mc">ゐる→いる／こゑ→こえ</td></tr>
+  <tr><td>ぢ・づ → じ・ず</td><td class="mc">はぢ→はじ／よろづ→よろず</td></tr>
+  <tr><td>au → ô</td><td class="mc">やうやう→ようよう</td></tr>
+  <tr><td>iu → yû</td><td class="mc">うつくしう→うつくしゅう</td></tr>
+  <tr><td>eu → yô</td><td class="mc">けふ→きょう／てふ→ちょう</td></tr>
+  <tr><td>くわ・ぐわ → か・が</td><td class="mc">くわし→かし</td></tr>
+  <tr><td>助動詞などの む → ん</td><td class="mc">行かむ→行かん</td></tr></table></div>
+  <p>コツ：「けふ」のように二段階で変わる語は、まず <span class="key">ふ→う</span>、次に <span class="key">eu→yô</span> と順に直す。</p>`],
+  ["古","係り結び",[2],`<div class="tbl"><table><tr><th>係りの助詞</th><th>意味</th><th>文末（結び）</th></tr>
+  <tr><td class="mc">ぞ・なむ</td><td>強調</td><td><b>連体形</b></td></tr>
+  <tr><td class="mc">や・か</td><td>疑問・反語</td><td><b>連体形</b></td></tr>
+  <tr><td class="mc">こそ</td><td>強調</td><td class="em">已然形</td></tr></table></div>
+  <p>例：<span class="mc">もと光る竹<span class="key">なむ</span>一筋あり<span class="key">ける</span>。</span>（「けり」→連体形「ける」）</p>
+  <p>例：<span class="mc">命<span class="key">こそ</span>惜しけれ。</span>（「惜し」→已然形「惜しけれ」）</p>
+  <p>覚え方：「ぞ・なむ・や・か」は連体形、「こそ」だけ已然形。</p>`],
+  ["古","よく出る古語（意味が今と違う語）",[1,2,3],`<div class="tbl"><table><tr><th>古語</th><th>古文での意味</th><th>今の意味</th></tr>
+  <tr><td class="mc">うつくし</td><td>かわいらしい</td><td>きれい</td></tr>
+  <tr><td class="mc">ありがたし</td><td>めったにない</td><td>感謝したい</td></tr>
+  <tr><td class="mc">おどろく</td><td>はっと気づく・目を覚ます</td><td>びっくりする</td></tr>
+  <tr><td class="mc">かなし</td><td>いとしい・かわいい</td><td>悲しい</td></tr>
+  <tr><td class="mc">あやし</td><td>不思議だ・身分が低い</td><td>怪しい</td></tr>
+  <tr><td class="mc">ののしる</td><td>大騒ぎする</td><td>悪口を言う</td></tr>
+  <tr><td class="mc">やがて</td><td>そのまま・すぐに</td><td>そのうち</td></tr></table></div>
+  <p>古文だけに出てくる語：<span class="mc">いと（とても）・をかし（趣がある）・つきづきし（似つかわしい）・つれづれなり（退屈だ）</span>。単語カードで反復しよう。</p>`],
+  ["古","文学史（作品・作者・時代）",[1,2,3],`<div class="tbl"><table><tr><th>時代</th><th>作品</th><th>ジャンル</th><th>作者</th></tr>
+  ${WORKS.filter(w=>!S.grade||WGR[w.t]===S.grade).map(w=>`<tr><td>${w.e.replace("時代","")}</td><td class="mc">${w.t}</td><td>${w.g}</td><td>${w.a}</td></tr>`).join("")}</table></div>
+  <p><span class="key">三大随筆</span>＝枕草子（清少納言）・方丈記（鴨長明）・徒然草（兼好法師）</p>`],
+  ["古","冒頭文（暗唱の定番）",[1,2,3],WORKS.filter(w=>w.o&&(!S.grade||WGR[w.t]===S.grade)).map(w=>`<p><b>『${w.t}』</b><br><span class="mc">${w.o}</span></p>`).join("")],
+  ["古","古文を読むコツ",[2,3],`<p><b>主語が省略される</b>：敬語（のたまふ＝おっしゃる、たまふ＝〜なさる）が付いていれば身分の高い人が主語。</p>
+  <p><b>よく出る助動詞</b>：<span class="mc">けり</span>（過去「〜た」・詠嘆「〜だなあ」）、<span class="mc">ず</span>（打消「〜ない」）、<span class="mc">む</span>（推量「〜だろう」・意志「〜しよう」）、<span class="mc">たり・り</span>（完了・存続「〜た・〜ている」）。</p>
+  <p><b>音読</b>：歴史的仮名遣いを現代の読み方で声に出すと、リズムで覚えられる。</p>`],
+  ["漢","訓読のきまり",[1],`<p><b>白文</b>：漢字だけの文。<b>訓読文</b>：白文に返り点・送り仮名（カタカナ）・句読点を付けたもの。<b>書き下し文</b>：訓読文を漢字かなまじり文に直したもの（歴史的仮名遣い）。</p>
+  <p>書き下し文では、助詞・助動詞にあたる字をひらがなにする。例：<span class="mc">不（ず）・之（の）・也（なり）</span></p>
+  <p><b>置き字</b>：<span class="mc">而・於・于・乎・矣・焉</span> など。書き下し文には書かない。</p>`],
+  ["漢","返り点（レ点・一二点・上下点）",[1,3],`<p><b>レ点</b>：すぐ上の一字に返る。</p>${ex("読[レ]書")}${ex("春眠不[レ]覚[レ]暁")}
+  <p><b>一・二点</b>：二字以上離れた上の字に返る。</p>${ex("有[レ]朋自[二]遠方[一]来")}
+  <p><b>上・下点</b>：一・二点をはさんで、さらに上に返る。</p>${ex("有[下]献[二]不死之薬*於荊王[一]者[上]")}
+  <p class="note">番号は読む順番。赤い小さな字が返り点、うすい字は置き字。</p>`],
+  ["漢","漢詩のきまり",[2,3],`<div class="tbl"><table><tr><th>形式</th><th>句の数</th><th>一句の字数</th></tr>
+  <tr><td>五言絶句</td><td>4</td><td>5</td></tr><tr><td>七言絶句</td><td>4</td><td>7</td></tr>
+  <tr><td>五言律詩</td><td>8</td><td>5</td></tr><tr><td>七言律詩</td><td>8</td><td>7</td></tr></table></div>
+  <p><b>構成（絶句）</b>：起句→承句→<span class="key">転句</span>（場面が変わる）→結句。</p>
+  <p><b>押韻</b>：五言は偶数句末、七言は第一句末と偶数句末で韻をふむ。</p>
+  <p><b>対句</b>：律詩は第三・四句、第五・六句を対句にする。</p>`],
+  ["漢","故事成語",[1],`<div class="tbl"><table><tr><th>故事成語</th><th>意味</th><th>出典</th></tr>
+  ${KOJI.filter((k,i)=>!S.grade||kojiGr(i)===S.grade).map(k=>`<tr><td class="mc">${k[0]}</td><td>${k[2]}</td><td>${k[3]}</td></tr>`).join("")}</table></div>`]
+  ];
+  document.getElementById("v-learn").innerHTML=`<h2>要点まとめ（${GNAME[S.grade]}）</h2><p class="note" style="margin:0">テスト前はここを読んでから、今日のおすすめ問題で確認しよう。</p>`+
+  ["古","漢"].map(g=>`<div class="group-title"><span class="kan">${g==="古"?"古文":"漢文"}</span></div>`+L.filter(l=>l[0]===g&&(!S.grade||l[2].includes(S.grade))).map(l=>`<details class="lesson"><summary><span>${l[1]}</span><span class="gchip">${l[2].length===3?"中1〜3":l[2].map(n=>"中"+n).join("・")}</span></summary><div class="body">${l[3]}</div></details>`).join("")).join("");
+}
+
+/* ===================== 単語カード ===================== */
+const DECKS={
+ kogo:{nm:"古語",cards:KOGO.map(([w,m,ex],i)=>({id:"c-kogo"+i,gr:+G_KOGO[i],f:w,b:`<div class="mean">${m}</div><div class="ex">${esc(ex)}</div>`,say:w}))},
+ koji:{nm:"故事成語",cards:KOJI.map(([w,r,m,src,st],i)=>({id:"c-koji"+i,gr:kojiGr(i),f:w,b:`<div class="note">${r}</div><div class="mean">${m}</div><div class="ex">『${src}』${st}</div>`}))},
+ open:{nm:"冒頭文",cards:WORKS.filter(w=>w.o).map((w,i)=>({id:"c-open"+i,gr:WGR[w.t],f:w.o,long:1,b:`<div class="mean">『${w.t}』</div><div class="ex">${w.a}・${w.e}・${w.g}</div>`,say:w.o}))},
+ kanshi:{nm:"漢詩",cards:KANSHI.map((p,i)=>({id:"c-ks"+i,gr:+G_KANSHI[i],f:`「${p.t}」`,long:p.t.length>6?1:0,b:`<div class="note">${p.a}・${p.f}</div><div class="poem">${p.k.join("<br>")}</div>`,say:p.k.join("、")}))},
+ kana:{nm:"仮名遣い",cards:KANA.map(([h,m,_,r],i)=>({id:"c-kana"+i,gr:1,f:h,b:`<div class="mean">${m}</div><div class="ex">${r}</div>`}))}
+};
+let CS={deck:"kogo",onlyNew:true,i:0,flip:false,order:[]};
+const deckCards=k=>DECKS[k].cards.filter(inG);
+function deckList(){let c=deckCards(CS.deck);if(CS.onlyNew){const u=c.filter(x=>!S.known[x.id]);if(u.length)c=u}return c}
+function resetDeck(){CS.order=shuffle(deckList());CS.i=0;CS.flip=false}
+function speak(text){try{const u=new SpeechSynthesisUtterance(text);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function renderCards(){
+  const avail=Object.keys(DECKS).filter(k=>deckCards(k).length);
+  if(!avail.includes(CS.deck)){CS.deck=avail[0];CS.order=[]}
+  if(!CS.order.length)resetDeck();
+  const dc=deckCards(CS.deck),known=dc.filter(c=>S.known[c.id]).length,c=CS.order[CS.i];
+  document.getElementById("v-cards").innerHTML=`<h2>単語カード（${GNAME[S.grade]}）</h2>
+  <div class="decks">${Object.entries(DECKS).filter(([k])=>avail.includes(k)).map(([k,v])=>`<button class="deck" data-d="${k}" aria-pressed="${k===CS.deck}">${v.nm}</button>`).join("")}</div>
+  <div class="toggle"><input type="checkbox" id="onlynew" ${CS.onlyNew?"checked":""}><label for="onlynew">覚えていないカードだけ</label><span style="margin-left:auto">覚えた ${known}/${dc.length}</span></div>
+  <div class="bar"><i style="width:${known/dc.length*100}%"></i></div>
+  ${c?`<div class="flash" id="flash" role="button" tabindex="0" aria-label="カードをめくる">
+    <div class="front${c.long?" long":""}">${c.f}</div>
+    ${CS.flip?`<div class="back">${c.b}</div>`:`<div class="hint">タップして答えを見る</div>`}
+    ${c.say?`<button class="speak" id="say">読み上げ</button>`:""}
+  </div>
+  <div class="note" style="text-align:center">${CS.i+1} / ${CS.order.length}</div>
+  <div class="cardbtns"><button class="sub-btn again" id="c-again">まだ</button><button class="sub-btn good" id="c-good">覚えた</button></div>`:
+  `<div class="sheet empty">このデッキは全部覚えました。<br><button class="sub-btn" id="c-reset" style="margin-top:10px">覚えた記録を消して最初から</button></div>`}`;
+  document.querySelectorAll(".deck").forEach(b=>b.onclick=()=>{CS.deck=b.dataset.d;resetDeck();renderCards()});
+  document.getElementById("onlynew").onchange=e=>{CS.onlyNew=e.target.checked;resetDeck();renderCards()};
+  const f=document.getElementById("flash");
+  if(f){const flip=()=>{CS.flip=!CS.flip;renderCards()};f.onclick=e=>{if(e.target.id!=="say")flip()};f.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip()}};
+    const sy=document.getElementById("say");if(sy)sy.onclick=e=>{e.stopPropagation();speak(c.say)};
+    const next=()=>{CS.i++;CS.flip=false;if(CS.i>=CS.order.length)resetDeck();renderCards()};
+    document.getElementById("c-good").onclick=()=>{S.known[c.id]=1;save();next()};
+    document.getElementById("c-again").onclick=()=>{delete S.known[c.id];save();CS.order.push(c);next()};}
+  const rs=document.getElementById("c-reset");if(rs)rs.onclick=()=>{dc.forEach(x=>delete S.known[x.id]);save();resetDeck();renderCards()};
+}
+
+/* ===================== 苦手・記録 ===================== */
+let confirmReset=false;
+function renderWeak(){
+  const weak=QG().filter(isWeak).sort((a,b)=>S.srs[b.id].w-S.srs[a.id].w);
+  const t=today(),days=[];for(let k=6;k>=0;k--){const d=S.days[t-k]||{n:0,c:0};days.push({k,...d})}
+  const max=Math.max(GOAL,...days.map(d=>d.n));
+  const dn=["日","月","火","水","木","金","土"];
+  const bars=days.map((d,j)=>{const x=12+j*44,h=d.n/max*90,dt=new Date((t-d.k)*864e5);
+    return `<rect x="${x}" y="${110-h}" width="28" height="${h}" rx="4" fill="var(--kin)"/><rect x="${x}" y="${110-d.c/max*90}" width="28" height="${d.c/max*90}" rx="4" fill="var(--ai)"/>
+    <text x="${x+14}" y="128" text-anchor="middle" font-size="11" fill="var(--sub)">${dn[dt.getUTCDay()]}</text>${d.n?`<text x="${x+14}" y="${104-h}" text-anchor="middle" font-size="11" fill="var(--ink)">${d.n}</text>`:""}`}).join("");
+  const gy=110-GOAL/max*90;
+  const tot=Object.values(S.days).reduce((a,d)=>({n:a.n+d.n,c:a.c+d.c}),{n:0,c:0});
+  document.getElementById("v-weak").innerHTML=`<h2>苦手・記録</h2>
+  <div class="sheet"><div class="eyebrow">この7日間（金＝解いた数・藍＝正解数）</div>
+   <svg viewBox="0 0 320 136" style="width:100%;height:auto;display:block;margin-top:6px" role="img" aria-label="7日間の学習量">
+   <line x1="6" x2="314" y1="${gy}" y2="${gy}" stroke="var(--line)" stroke-dasharray="4 4"/><text x="314" y="${gy-4}" text-anchor="end" font-size="10" fill="var(--sub)">目標${GOAL}</text>${bars}</svg>
+   <div class="note">これまでに ${tot.n}問 解いて正答率 ${tot.n?Math.round(tot.c/tot.n*100):0}%・連続 ${streak()}日</div></div>
+  <div class="sheet weak"><div class="eyebrow">苦手な問題（${weak.length}）</div>
+   ${weak.length?`<ul>${weak.slice(0,40).map(q=>`<li><span>${esc(q.label)}</span><span class="w">×${S.srs[q.id].w}</span></li>`).join("")}</ul>
+   <button class="big-btn" id="w-go" style="margin-top:12px">苦手を復習する（${Math.min(weak.length,15)}問）</button>`:`<div class="empty">まだ苦手な問題はありません。<br>間違えた問題がここにたまり、3回続けて正解すると消えます。</div>`}</div>
+  <div class="sheet"><div class="eyebrow">データ</div><p class="note">学習記録はこの端末のブラウザに保存されます。</p>
+   <div class="confirm">${confirmReset?`<span>本当に全部消しますか？</span><button class="sub-btn" id="rs-yes" style="color:var(--ng)">消す</button><button class="sub-btn" id="rs-no">やめる</button>`:`<button class="sub-btn" id="rs">学習記録をリセット</button>`}</div></div>`;
+  const g=document.getElementById("w-go");if(g)g.onclick=()=>startQuiz(shuffle(weak).slice(0,15),"苦手の復習");
+  const r=document.getElementById("rs");if(r)r.onclick=()=>{confirmReset=true;renderWeak()};
+  const y=document.getElementById("rs-yes");if(y)y.onclick=()=>{S={srs:{},days:{},known:{},grade:S.grade};save();confirmReset=false;renderAll()};
+  const n=document.getElementById("rs-no");if(n)n.onclick=()=>{confirmReset=false;renderWeak()};
+}
+
+/* ===================== ナビ ===================== */
+let VIEW="home";
+function showView(v){VIEW=v;["home","learn","cards","weak"].forEach(k=>document.getElementById("v-"+k).hidden=k!==v);
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.v===v?"page":"false"));
+  renderAll();window.scrollTo(0,0)}
+function renderAll(){renderHome();if(VIEW==="learn")renderLearn();if(VIEW==="cards")renderCards();if(VIEW==="weak")renderWeak()}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
+function paintGrade(){document.querySelectorAll(".grades button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.g===S.grade)))}
+document.querySelectorAll(".grades button").forEach(b=>b.onclick=()=>{S.grade=+b.dataset.g;save();CS.order=[];paintGrade();renderAll()});
+paintGrade();
+renderLearn();renderAll();
+</script>
+
+</body>
+</html>
