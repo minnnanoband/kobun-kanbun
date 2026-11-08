@@ -52,7 +52,7 @@ header.top .grades{gap:6px;padding-block:0 10px;justify-content:stretch}
 .streak{font-size:.8rem;font-weight:700;background:rgba(128,128,128,.22);padding:3px 10px;border-radius:999px;white-space:nowrap}
 
 main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-main .wrap{padding-block:18px;display:flex;flex-direction:column;gap:18px}
+main .wrap{padding-top:18px;padding-bottom:18px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
 h2{font-family:var(--mincho);font-weight:700;font-size:1.15rem;margin:0;text-wrap:balance;letter-spacing:.04em}
 .eyebrow{font-size:.72rem;letter-spacing:.14em;color:var(--sub);font-weight:700}
 .sheet{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:16px}
@@ -63,7 +63,7 @@ h2{font-family:var(--mincho);font-weight:700;font-size:1.15rem;margin:0;text-wra
 .ring circle{fill:none;stroke-width:9}
 .ring .bgc{stroke:var(--line)} .ring .fg{stroke:var(--kin);stroke-linecap:round;transition:stroke-dashoffset .6s}
 .ring text{fill:var(--ink);font-family:var(--mincho);font-weight:800;font-size:22px}
-.stats{display:flex;flex-direction:column;gap:4px;min-width:0}
+.stats{display:grid;gap:4px;min-width:0}
 .stats b{font-variant-numeric:tabular-nums}
 .big-btn{display:block;width:100%;border:0;border-radius:12px;background:var(--ai);color:var(--onai);padding:15px 16px;font-weight:700;font-size:1.05rem;cursor:pointer;text-align:left}
 .big-btn span{display:block;font-weight:500;font-size:.8rem;opacity:.85}
@@ -73,7 +73,7 @@ h2{font-family:var(--mincho);font-weight:700;font-size:1.15rem;margin:0;text-wra
 .group-title{display:flex;align-items:baseline;gap:10px}
 .group-title .kan{font-family:var(--mincho);font-size:1.6rem;font-weight:800;color:var(--ai);line-height:1}
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.cat{border:1px solid var(--line);background:var(--sheet);border-radius:12px;padding:12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.cat{border:1px solid var(--line);background:var(--sheet);border-radius:12px;padding:12px;text-align:left;cursor:pointer;display:grid;gap:6px;min-width:0}
 .cat .nm{font-weight:700;font-size:.95rem}
 .cat .meta{font-size:.72rem;color:var(--sub);font-variant-numeric:tabular-nums}
 .bar{height:6px;background:var(--line);border-radius:999px;overflow:hidden}
@@ -105,13 +105,13 @@ details.lesson[open] summary::after{content:"－"}
 
 /* kanbun vertical */
 .kbbox{overflow-x:auto;display:flex;justify-content:center;padding:6px 0}
-.kb{writing-mode:vertical-rl;font-family:var(--mincho);font-weight:700;font-size:2rem;line-height:2.6;max-height:9.5em;letter-spacing:.12em}
+.kb{-webkit-writing-mode:vertical-rl;writing-mode:vertical-rl;font-family:var(--mincho);font-weight:700;font-size:2rem;line-height:2.6;max-height:9.5em;letter-spacing:.12em}
 .kb.small{font-size:1.5rem}
 .kc{position:relative;display:inline-block;padding-block:.06em;border-radius:6px;cursor:default;user-select:none}
 .kc.tap{cursor:pointer}
 .kc.tap:hover{background:var(--ai-soft)}
 .kc .mk{position:absolute;left:-.42em;bottom:-.12em;font-size:.4em;color:var(--ng);letter-spacing:0;font-weight:800}
-.kc .no{position:absolute;right:-.62em;top:.05em;font-size:.38em;letter-spacing:0;font-family:var(--goth);font-weight:700;color:var(--onai);background:var(--ai);border-radius:999px;width:1.5em;height:1.5em;line-height:1.5em;text-align:center;writing-mode:horizontal-tb}
+.kc .no{position:absolute;right:-.62em;top:.05em;font-size:.38em;letter-spacing:0;font-family:var(--goth);font-weight:700;color:var(--onai);background:var(--ai);border-radius:999px;width:1.5em;height:1.5em;line-height:1.5em;text-align:center;-webkit-writing-mode:horizontal-tb;writing-mode:horizontal-tb}
 .kc.done{color:var(--sub)}
 .kc.oki{color:var(--sub);opacity:.55}
 .kc.bad .no{background:var(--ng)}
@@ -128,7 +128,7 @@ details.lesson[open] summary::after{content:"－"}
 .qtext{font-size:1.12rem;font-weight:500;margin:.3em 0 .8em}
 .qtext .mcbig{font-family:var(--mincho);font-weight:800;font-size:1.9rem;display:block;margin:.2em 0;color:var(--ai)}
 .qtext .quote{font-family:var(--mincho);font-size:1.15rem;display:block;background:var(--sheet);border-left:3px solid var(--kin);padding:8px 12px;margin:.5em 0;border-radius:0 8px 8px 0}
-.choices{display:flex;flex-direction:column;gap:10px}
+.choices{display:grid;gap:10px}
 .ch{border:1.5px solid var(--line);background:var(--sheet);border-radius:12px;padding:13px 14px;text-align:left;cursor:pointer;font-size:1rem;display:flex;gap:10px;align-items:flex-start}
 .ch .lb{font-family:var(--mincho);font-weight:800;color:var(--sub);min-width:1.2em}
 .ch.ok{border-color:var(--ok);background:var(--ok-soft)}
@@ -139,7 +139,7 @@ details.lesson[open] summary::after{content:"－"}
 .fb .v{font-weight:800;font-size:1.05rem;margin-bottom:4px}
 .fb.ok .v{color:var(--ok)} .fb.ng .v{color:var(--ng)}
 .next{margin-top:14px}
-.result{text-align:center;display:flex;flex-direction:column;gap:14px;padding-block:24px}
+.result{text-align:center;display:grid;gap:14px;padding-top:24px;padding-bottom:24px}
 .result .score{font-family:var(--mincho);font-size:3.4rem;font-weight:800;color:var(--ai);line-height:1}
 .result ul{text-align:left;margin:0;padding-left:1.2em;font-size:.9rem}
 
@@ -147,14 +147,14 @@ details.lesson[open] summary::after{content:"－"}
 .decks{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
 .deck{border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.85rem;white-space:nowrap;cursor:pointer}
 .deck[aria-pressed="true"]{background:var(--ai);color:var(--onai);border-color:var(--ai)}
-.flash{min-height:260px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 18px;cursor:pointer;gap:10px}
+.flash{min-height:260px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);display:grid;justify-items:center;align-content:center;text-align:center;padding:24px 18px;cursor:pointer;gap:10px}
 .flash .front{font-family:var(--mincho);font-weight:800;font-size:2rem;color:var(--ai);line-height:1.4;text-wrap:balance}
 .flash .front.long{font-size:1.2rem;font-weight:700}
 .flash .back{font-size:1rem}
 .flash .back .mean{font-weight:700;font-size:1.2rem}
 .flash .back .ex{font-family:var(--mincho);color:var(--sub);font-size:.92rem;margin-top:6px}
 .flash .hint{font-size:.75rem;color:var(--sub)}
-.poem{font-family:var(--mincho);writing-mode:vertical-rl;font-size:1.25rem;line-height:1.9;margin:0 auto;max-height:12em;font-weight:700}
+.poem{font-family:var(--mincho);-webkit-writing-mode:vertical-rl;writing-mode:vertical-rl;font-size:1.25rem;line-height:1.9;margin:0 auto;max-height:12em;font-weight:700}
 .cardbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .cardbtns .sub-btn.good{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
 .cardbtns .sub-btn.again{background:var(--ng-soft);border-color:var(--ng);color:var(--ng)}
@@ -206,6 +206,12 @@ details.lesson[open] summary::after{content:"－"}
 </div></nav>
 
 <div id="quiz" hidden></div>
+<div id="errbox" hidden style="position:fixed;left:8px;right:8px;bottom:90px;z-index:99;background:#A8343B;color:#fff;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5"></div>
+<script>
+var APP_VER="2026-11-08d";
+window.onerror=function(msg,src,line,col){var b=document.getElementById("errbox");if(!b)return;b.hidden=false;
+  b.textContent="エラーが起きました（この画面を写真に撮って送ってください）："+msg+" ／ "+line+"行 ／ 版 "+APP_VER+" ／ "+navigator.userAgent;};
+</script>
 
 <script>
 /* ===================== データ ===================== */
@@ -449,7 +455,7 @@ KANSHI.forEach((p,i)=>{const g=G_KANSHI[i];
   mc("kanshi","ks-r"+i,`「${p.t}」の押韻`,`「${p.t}」で押韻している字の組み合わせは？${poem}`,corr,[...combos],`${p.f.startsWith("七")?"七言詩は第一句末と偶数句末":"五言詩は偶数句末（第一句末も押韻することがある）"}で韻をふむ。`,g);
 });
 KANSHI_X.forEach(([p,c,ex],i)=>mc("kanshi","ksx"+i,p.slice(0,22),p,c[0],c.slice(1),ex,G_KANSHIX[i]));
-const QMAP=Object.fromEntries(Q.map(q=>[q.id,q]));
+const QMAP={};Q.forEach(q=>{QMAP[q.id]=q});
 const GNAME=["全学年","中1","中2","中3"];
 const GDESC=["中1〜中3のすべての範囲","歴史的仮名遣い・竹取物語・故事成語・返り点（レ点・一二点）","枕草子・平家物語・徒然草・係り結び・漢詩（絶句）","おくのほそ道・和歌集・論語・漢詩（律詩）・上下点"];
 const inG=x=>!S.grade||x.gr===S.grade;
@@ -555,7 +561,7 @@ function answer(q,ok,html){record(q.id,ok);RUN.res.push({q,ok});
   const last=RUN.i===RUN.list.length-1;
   document.getElementById("qfb").innerHTML=`<div class="fb ${ok?"ok":"ng"}"><div class="v">${ok?"正解！":"おしい！"}</div>${html}</div><button class="big-btn next" id="qn">${last?"結果を見る":"次へ"}</button>`;
   const n=document.getElementById("qn");n.onclick=()=>{if(last)renderResult();else{RUN.i++;renderQ()}};n.focus({preventScroll:true});
-  n.scrollIntoView({behavior:"smooth",block:"nearest"})}
+  try{n.scrollIntoView({behavior:"smooth",block:"nearest"})}catch(e){}}
 function renderResult(){const c=RUN.res.filter(r=>r.ok).length,ng=RUN.res.filter(r=>!r.ok);
   const msg=c===RUN.res.length?"全問正解！この調子。":c/RUN.res.length>=.7?"よくできました。間違えた問題は明日以降にまた出ます。":"間違えた問題こそ伸びしろ。もう一度解いてみよう。";
   QZ.innerHTML=`<div class="wrap result"><div class="eyebrow">${esc(RUN.title)}</div><div class="score">${c}<small style="font-size:1.2rem">/${RUN.res.length}</small></div><p>${msg}</p>
@@ -623,17 +629,6 @@ function renderLearn(){
 }
 
 /* ===================== 単語カード ===================== */
-const DECKS={
- kogo:{nm:"古語",cards:KOGO.map(([w,m,ex],i)=>({id:"c-kogo"+i,gr:+G_KOGO[i],f:w,b:`<div class="mean">${m}</div><div class="ex">${esc(ex)}</div>`,say:modern(w)}))},
- koji:{nm:"故事成語",cards:KOJI.map(([w,r,m,src,st],i)=>({id:"c-koji"+i,gr:kojiGr(i),f:w,b:`<div class="note">${r}</div><div class="mean">${m}</div><div class="ex">『${src}』${st}</div>`}))},
- open:{nm:"冒頭文",cards:WORKS.filter(w=>w.o).map((w,i)=>({id:"c-open"+i,gr:WGR[w.t],f:w.o,long:1,b:`<div class="mean">『${w.t}』</div><div class="ex">${w.a}・${w.e}・${w.g}</div>`,say:OPEN_YOMI[w.t]||w.o}))},
- kanshi:{nm:"漢詩",cards:KANSHI.map((p,i)=>({id:"c-ks"+i,gr:+G_KANSHI[i],f:`「${p.t}」`,long:p.t.length>6?1:0,b:`<div class="note">${p.a}・${p.f}</div><div class="poem">${p.k.join("<br>")}</div>`,say:ksSay(p)}))},
- kana:{nm:"仮名遣い",cards:KANA.map(([h,m,_,r],i)=>({id:"c-kana"+i,gr:1,f:h,b:`<div class="mean">${m}</div><div class="ex">${r}</div>`}))}
-};
-let CS={deck:"kogo",onlyNew:true,i:0,flip:false,order:[]};
-const deckCards=k=>DECKS[k].cards.filter(inG);
-function deckList(){let c=deckCards(CS.deck);if(CS.onlyNew){const u=c.filter(x=>!S.known[x.id]);if(u.length)c=u}return c}
-function resetDeck(){CS.order=shuffle(deckList());CS.i=0;CS.flip=false}
 /* 読み上げ：歴史的仮名遣い→現代の発音に直してから読む */
 function modern(s){
   const OV={"いふかひなし":"いうかいなし","のたまふ":"のたまう","たまふ":"たまう"};if(OV[s])return OV[s];
@@ -647,6 +642,17 @@ function modern(s){
 const OPEN_YOMI={"竹取物語":"今は昔、竹取の翁というものありけり。","土佐日記":"男もすなる日記というものを、女もしてみんとてするなり。","枕草子":"春はあけぼの。ようよう白くなりゆく山ぎわ、少しあかりて、紫だちたる雲の細くたなびきたる。","源氏物語":"いずれのおおんときにか、にょうご、こうい、あまたさぶらいたまいける中に、","方丈記":"ゆく河の流れは絶えずして、しかももとの水にあらず。","平家物語":"祇園精舎の鐘の声、諸行無常の響きあり。","徒然草":"つれづれなるままに、ひぐらし、すずりに向かいて、心にうつりゆくよしなしごとを、そこはかとなく書きつくれば、","おくのほそ道":"月日は、はくたいのかかくにして、行きかう年もまた旅人なり。"};
 const KS_FIX=[["烽火三月","ほうかさんげつ"],["煙花三月","えんかさんがつ"],["今春看又過ぐ","こんしゅんみすみすすぐ"],["牀前","しょうぜん"],["処処","しょしょ"],["啼鳥","ていちょう"],["春眠","しゅんみん"],["夜来","やらい"],["風雨","ふうう"],["多少","たしょう"],["看る","みる"],["山月","さんげつ"],["低れて","たれて"],["江碧","こうへき"],["逾よ","いよいよ"],["然えん","もえん"],["欲す","ほっす"],["何れ","いずれ"],["帰年","きねん"],["故人","こじん"],["辞し","じし"],["揚州","ようしゅう"],["孤帆","こはん"],["遠影","えんえい"],["碧空","へきくう"],["天際","てんさい"],["渭城","いじょう"],["朝雨","ちょうう"],["軽塵","けいじん"],["浥す","うるおす"],["客舎","かくしゃ"],["青青","せいせい"],["柳色","りゅうしょく"],["一杯","いっぱい"],["陽関","ようかん"],["山河","さんが"],["城春","しろはる"],["草木","そうもく"],["濺ぎ","そそぎ"],["家書","かしょ"],["万金","ばんきん"],["抵たる","あたる"],["白頭","はくとう"],["搔けば","かけば"],["渾べて","すべて"],["簪","しん"],["勝えざらん","たえざらん"]];
 const ksSay=p=>KS_FIX.reduce((t,[a,b])=>t.split(a).join(b),modern(p.k.join("。")));
+const DECKS={
+ kogo:{nm:"古語",cards:KOGO.map(([w,m,ex],i)=>({id:"c-kogo"+i,gr:+G_KOGO[i],f:w,b:`<div class="mean">${m}</div><div class="ex">${esc(ex)}</div>`,say:modern(w)}))},
+ koji:{nm:"故事成語",cards:KOJI.map(([w,r,m,src,st],i)=>({id:"c-koji"+i,gr:kojiGr(i),f:w,b:`<div class="note">${r}</div><div class="mean">${m}</div><div class="ex">『${src}』${st}</div>`}))},
+ open:{nm:"冒頭文",cards:WORKS.filter(w=>w.o).map((w,i)=>({id:"c-open"+i,gr:WGR[w.t],f:w.o,long:1,b:`<div class="mean">『${w.t}』</div><div class="ex">${w.a}・${w.e}・${w.g}</div>`,say:OPEN_YOMI[w.t]||w.o}))},
+ kanshi:{nm:"漢詩",cards:KANSHI.map((p,i)=>({id:"c-ks"+i,gr:+G_KANSHI[i],f:`「${p.t}」`,long:p.t.length>6?1:0,b:`<div class="note">${p.a}・${p.f}</div><div class="poem">${p.k.join("<br>")}</div>`,say:ksSay(p)}))},
+ kana:{nm:"仮名遣い",cards:KANA.map(([h,m,_,r],i)=>({id:"c-kana"+i,gr:1,f:h,b:`<div class="mean">${m}</div><div class="ex">${r}</div>`}))}
+};
+let CS={deck:"kogo",onlyNew:true,i:0,flip:false,order:[]};
+const deckCards=k=>DECKS[k].cards.filter(inG);
+function deckList(){let c=deckCards(CS.deck);if(CS.onlyNew){const u=c.filter(x=>!S.known[x.id]);if(u.length)c=u}return c}
+function resetDeck(){CS.order=shuffle(deckList());CS.i=0;CS.flip=false}
 let JA=null;
 function loadVoices(){try{const v=speechSynthesis.getVoices();JA=v.find(x=>/^ja/i.test(x.lang))||null}catch(e){}}
 try{loadVoices();speechSynthesis.addEventListener("voiceschanged",loadVoices)}catch(e){}
@@ -699,7 +705,7 @@ function renderCards(){
 let confirmReset=false;
 function renderWeak(){
   const weak=QG().filter(isWeak).sort((a,b)=>S.srs[b.id].w-S.srs[a.id].w);
-  const t=today(),days=[];for(let k=6;k>=0;k--){const d=S.days[t-k]||{n:0,c:0};days.push({k,...d})}
+  const t=today(),days=[];for(let k=6;k>=0;k--){const d=S.days[t-k]||{n:0,c:0};days.push(Object.assign({k:k},d))}
   const max=Math.max(GOAL,...days.map(d=>d.n));
   const dn=["日","月","火","水","木","金","土"];
   const bars=days.map((d,j)=>{const x=12+j*44,h=d.n/max*90,dt=new Date((t-d.k)*864e5);
@@ -715,7 +721,7 @@ function renderWeak(){
   <div class="sheet weak"><div class="eyebrow">苦手な問題（${weak.length}）</div>
    ${weak.length?`<ul>${weak.slice(0,40).map(q=>`<li><span>${esc(q.label)}</span><span class="w">×${S.srs[q.id].w}</span></li>`).join("")}</ul>
    <button class="big-btn" id="w-go" style="margin-top:12px">苦手を復習する（${Math.min(weak.length,15)}問）</button>`:`<div class="empty">まだ苦手な問題はありません。<br>間違えた問題がここにたまり、3回続けて正解すると消えます。</div>`}</div>
-  <div class="sheet"><div class="eyebrow">データ</div><p class="note">学習記録はこの端末のブラウザに保存されます。</p>
+  <div class="sheet"><div class="eyebrow">データ</div><p class="note">学習記録はこの端末のブラウザに保存されます。（アプリの版：${APP_VER}）</p>
    <div class="confirm">${confirmReset?`<span>本当に全部消しますか？</span><button class="sub-btn" id="rs-yes" style="color:var(--ng)">消す</button><button class="sub-btn" id="rs-no">やめる</button>`:`<button class="sub-btn" id="rs">学習記録をリセット</button>`}</div></div>`;
   const g=document.getElementById("w-go");if(g)g.onclick=()=>startQuiz(shuffle(weak).slice(0,15),"苦手の復習");
   const r=document.getElementById("rs");if(r)r.onclick=()=>{confirmReset=true;renderWeak()};
